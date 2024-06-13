@@ -50,7 +50,36 @@ class Server
             } else { //si el mètode es qualsevol altre cosa que POST
                 header('HTTP/1.1 405 Method Not Allowed');
             }
-        } 
+        }
+        else if($recurs1 == "logIn")
+        {
+            echo "anar emplenant amb endpoints publics";
+        }
+        else
+        {
+            $id = explode('.', $recurs1); //divideixo el valor passat del recurs1(apikey + userID)
+
+            $apikey = $id[0];
+            $userID = $id[1];
+            
+            if (UserValidation($apikey, $userID) == true) 
+            {
+                if ($recurs2 == "UserInfo") {
+                    if ($method == "GET") {
+                        if ($identificador != "") { //si hi ha un identificador d'usuari
+                            echo json_encode(selectOneUser($apikey, $identificador)); //li passo l'api-key i el UserID
+                            header('HTTP/1.1 200 OK');
+                            
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "User identifier needed";
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                }
+            }
+        }
     }
 }
 

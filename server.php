@@ -78,6 +78,36 @@ class Server
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
                 }
+                else if($recurs2 == "GetAllUsers")// MILLORAR CONDICIO DE CARES A FUTUR(AQUESTA NOMES POT ACCEDOR ROOT)
+                {
+                    if ($method == "GET") {
+                        if ($identificador != "") { //si hi ha un identificador d'usuari
+                            echo json_encode(selectAllUsers($apikey, $identificador)); //li passo l'api-key i el UserID
+                            header('HTTP/1.1 200 OK');
+                            
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "User identifier needed";
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                }
+                else if($recurs2 == "ModifyUser"){
+                    if ($method == "POST") {
+                        if ($identificador != "") { //si hi ha un identificador d'usuari
+                            $put = json_decode(file_get_contents('php://input'), true);
+                
+                            $message = updateUser($apikey,$userID, $put);
+                            
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "User identifier needed";
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                }
             }
         }
     }

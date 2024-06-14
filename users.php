@@ -176,4 +176,116 @@ function UserValidation($apikey, $userID){
         return false;
     }
 }
+/*
+        Function: selectAllUsers()
+
+            Funcio que NOMES POT EXECUTAR L'USUARI ADMINISTRADOR i et selecciona tots els usuaris de la base de dades
+
+        Parameters:
+
+        Returns:
+
+            Retorna tota la llista d'usuaris registrats
+ 
+    */
+
+function selectAllUsers($APIKEY, $UserID){
+    if(selectOneUser($APIKEY, $UserID))
+    $baseDades = new BdD; //creo nova classe BDD
+
+    try {
+        $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $senteciSQL = "SELECT * FROM users";
+
+        $bdd = $conn->prepare($senteciSQL);
+        $bdd->execute(); //executola sentencia
+        $bdd->setFetchMode(PDO::FETCH_ASSOC);
+        $resultat = $bdd->fetchAll(); //guardo els resultats
+
+        // si ha trobat un usuari
+            return $resultat;
+       
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+
+        return false;
+    }
+}
+
+/*
+        Function: modifyUser()
+
+            Funcio que amb els paràmetres passats, modifica l'usuari que tingui l'identificador passat
+
+        Parameters:
+
+            $UserName - nom d'usuari
+
+            $UserLastName - cognom d'usuari
+    
+            $UserEmail - email d'usuari
+
+            $passwd - password usuari
+
+            $identificador - UserID
+
+        Returns:
+
+            Retorna true si el update s'ha fet correctament i false si algo ha fallat
+ 
+    */
+function updateUser($APIKEY, $UserID, $user_data){
+    $baseDades = new BdD; //creo nova classe BDD
+    $user_name = $user_data["data"][0]["UserName"];
+    $user_email = $user_data["data"][0]["UserEmail"];
+    $user_pass = $user_data["data"][0]["pass"];
+    $user_role = $user_data["data"][0]["UserRole"];
+    $user_pic = $user_data["data"][0]["ProfilePic"];
+
+    try {
+        if (UserValidation($APIKEY, $UserID)) { // Valido que l'usuari sigui el mateix
+            $conn = new PDO("mysql:host={$baseDades->db_host};dbname={$baseDades->db_name}", $baseDades->db_user, $baseDades->db_password);
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            // Verifica si el correu electrònic ja existeix
+            $checkEmailSQL = "SELECT COUNT(*) FROM users WHERE user_email = :user_email AND user_id != :UserID";
+            $checkEmailStmt = $conn->prepare($checkEmailSQL);
+            $checkEmailStmt->bindParam(":user_email", $user_email);
+            $checkEmailStmt->bindParam(":UserID", $UserID);
+            $checkEmailStmt->execute();
+            $emailCount = $checkEmailStmt->fetchColumn();
+
+            if ($emailCount > 0) {
+                header('HTTP/1.1 409 Conflict');
+                echo "This email is already taken by another user";
+                return false;
+            }
+
+            // Actualització de l'usuari
+            $sentenciaSQL = "UPDATE users
+            SET user_name = :user_name, user_email = :user_email, user_role = :user_role, pass = :pass, profile_pic = :profile_pic
+            WHERE user_id = :UserID";
+
+            $bdd = $conn->prepare($sentenciaSQL);
+            $bdd->bindParam(":user_name", $user_name);
+            $bdd->bindParam(":user_email", $user_email);
+            $bdd->bindParam(":user_role", $user_role);
+            $bdd->bindParam(":pass", $user_pass);
+            $bdd->bindParam("profile_pic", $user_pic);
+            $bdd->bindParam("UserID", $UserID);
+
+            $bdd->execute(); //executola sentencia
+            $bdd->setFetchMode(PDO::FETCH_ASSOC);
+
+            return true;
+        } else { //retorna aixo si un usuari amb id 5 intenta modificar un altre amb
+            echo "this user is not yours, cannot modify it ";
+        }
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        return false;
+    }
+}
 ?>

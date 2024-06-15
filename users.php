@@ -150,18 +150,19 @@ function selectOneUser($APIKEY, $UserID){
             Retorna FALSE si no ha trobat cap usuari amb l'API-KEY passada o algo de la cosulta ha fallat
  
     */
-function UserValidation($apikey, $userID){
+function UserValidation($apikey, $userID, $user_role){
     $baseDades = new BdD; //creo nova classe BDD
 
     try {
         $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $senteciSQL = "SELECT user_id, APIKEY FROM users WHERE `APIKEY` = :APIKEY AND `user_id` = :UserID";
+        $senteciSQL = "SELECT user_id, APIKEY, user_role FROM users WHERE `APIKEY` = :APIKEY AND `user_id` = :UserID AND user_role = :user_role";
 
         $bdd = $conn->prepare($senteciSQL);
         $bdd->bindParam("APIKEY", $apikey); //aplico els parametres necessaris
         $bdd->bindParam("UserID", $userID); //aplico els parametres necessaris
+        $bdd->bindParam("user_role", $user_role); //aplico els parametres necessaris
         $bdd->execute(); //executola sentencia
         $bdd->setFetchMode(PDO::FETCH_ASSOC);
         $resultat = $bdd->fetchAll(); //guardo els resultats
@@ -236,7 +237,7 @@ function selectAllUsers($APIKEY, $UserID){
             Retorna true si el update s'ha fet correctament i false si algo ha fallat
  
     */
-function updateUser($APIKEY, $UserID, $user_data){
+function updateUser($APIKEY, $UserID, $user_data, $role){
     $baseDades = new BdD; //creo nova classe BDD
     $user_name = $user_data["data"][0]["UserName"];
     $user_email = $user_data["data"][0]["UserEmail"];
@@ -245,7 +246,7 @@ function updateUser($APIKEY, $UserID, $user_data){
     $user_pic = $user_data["data"][0]["ProfilePic"];
 
     try {
-        if (UserValidation($APIKEY, $UserID)) { // Valido que l'usuari sigui el mateix
+        if (UserValidation($APIKEY, $UserID, $role)) { // Valido que l'usuari sigui el mateix
             $conn = new PDO("mysql:host={$baseDades->db_host};dbname={$baseDades->db_name}", $baseDades->db_user, $baseDades->db_password);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -288,4 +289,55 @@ function updateUser($APIKEY, $UserID, $user_data){
         return false;
     }
 }
+
+
+/*
+        Function: LogIn()
+
+            Funció que passant-li un usuari i una contrassenya et retorna el seu ID i API-KEY
+
+        Parameters:
+
+            $UserName - Variable amb el valor del correu de l'usuari
+
+            $passwd - Variable amb la contrassenya de l'usuari
+
+        Returns:
+
+            Retorna l'Ud d'usuari i la seva API-KEY
+
+    */
+    function LogIn($user_data)
+    {
+    
+        //var_dump($user_data);
+        $baseDades = new BdD; //creo nova classe BDD
+        $user_email = $user_data["data"][0]["UserEmail"];
+        $user_pass = $user_data["data"][0]["pass"];
+    
+        try {
+            $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+            $senteciSQL = "SELECT user_id, APIKEY, user_role, profile_pic FROM users WHERE `user_email` = :user_email AND `pass` = :pass";
+    
+            $bdd = $conn->prepare($senteciSQL);
+            $bdd->bindParam("user_email", $user_email); //aplico els parametres necessaris
+            $bdd->bindParam("pass", $user_pass);
+            $bdd->execute(); //executola sentencia
+            $bdd->setFetchMode(PDO::FETCH_ASSOC);
+            $resultat = $bdd->fetchAll(); //guardo els resultats
+    
+            if (count($resultat) == 1) { // si ha trobat un usuari
+                return $resultat;
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+    
+            return false;
+        }
+    }
+    
 ?>

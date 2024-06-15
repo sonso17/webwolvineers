@@ -51,9 +51,26 @@ class Server
                 header('HTTP/1.1 405 Method Not Allowed');
             }
         }
-        else if($recurs1 == "logIn")
+        else if($recurs1 == "LogIn")
         {
-            echo "anar emplenant amb endpoints publics";
+            if ($method == 'POST') // validem que sigui per GET
+            { //agafo tota la info de l'usuari en JSON
+                $put = json_decode(file_get_contents('php://input'), true);
+                
+                $message = LogIn($put);
+
+                if ($message == true) {
+                    // echo "user inserted correctly";
+                    echo json_encode($message);
+                    header('HTTP/1.1 200 OK');
+                } else {
+                    echo "username or password not correct";
+                    header('HTTP/1.1 417 EXPECTATION FAILED');
+                }
+                
+            } else { //si el mètode es qualsevol altre cosa que POST
+                header('HTTP/1.1 405 Method Not Allowed');
+            }
         }
         else
         {
@@ -61,8 +78,10 @@ class Server
 
             $apikey = $id[0];
             $userID = $id[1];
+            $role = $id[2];
             
-            if (UserValidation($apikey, $userID) == true) 
+            
+            if (UserValidation($apikey, $userID, $role) == true) 
             {
                 if ($recurs2 == "UserInfo") {
                     if ($method == "GET") {
@@ -78,7 +97,7 @@ class Server
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
                 }
-                else if($recurs2 == "GetAllUsers")// MILLORAR CONDICIO DE CARES A FUTUR(AQUESTA NOMES POT ACCEDOR ROOT)
+                else if($recurs2 == "GetAllUsers")// MILLORAR CONDICIO DE CARES A FUTUR(AQUESTA NOMES POT ACCEDIR ROOT)
                 {
                     if ($method == "GET") {
                         if ($identificador != "") { //si hi ha un identificador d'usuari
@@ -98,7 +117,7 @@ class Server
                         if ($identificador != "") { //si hi ha un identificador d'usuari
                             $put = json_decode(file_get_contents('php://input'), true);
                 
-                            $message = updateUser($apikey,$userID, $put);
+                            $message = updateUser($apikey,$userID, $put, $role);
                             
                         } else {
                             header('HTTP/1.1 417 EXPECTATION FAILED');

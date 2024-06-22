@@ -1,7 +1,11 @@
 <template>
   <div class="home">
     <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <h1>Users</h1><br>
+    <button @click="goToLogIn">Log In</button>
+    <button @click="goToUserInfo">user Info</button>
+    <button @click="goToRegister">Register</button>
+    <button @click="goToModifyUser">Modify User</button>
   </div>
 </template>
 
@@ -10,9 +14,49 @@
 
 
 export default {
-  name: 'HomeView',
-  components: {
-    
+  name: 'paginaInici',
+  data() {
+        return {
+            userID: "",
+            apikey: "",
+            user_role: "",
+            boolSessio: false
+        }
+    },
+  methods: {
+    goToLogIn() {
+      this.$router.push('/login')
+    },
+    goToRegister() {
+      this.$router.push('/register')
+    },
+    goToUserInfo() {
+      this.$router.push('/userInfo/' + this.userID)
+    },
+    goToModifyUser() {
+      this.$router.push('/modifyUser/' + this.userID)
+    },
+    comprovarSessio() {
+      if (sessionStorage.UserID && sessionStorage.APIKEY && sessionStorage.user_role) {
+        this.userID = sessionStorage.UserID;
+        this.apikey = sessionStorage.APIKEY;
+        this.user_role = sessionStorage.user_role;
+        this.boolSessio = true;
+        return true;
+      }
+      else {
+        console.log(this.userID)
+        console.log(this.apikey)
+        console.log(this.user_role)
+
+        this.boolSessio = false;
+        return false;
+      }
+    },
+
+  },
+  created() {
+    this.comprovarSessio()
   }
 }
 </script>

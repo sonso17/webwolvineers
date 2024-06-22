@@ -11,6 +11,7 @@
       <img v-if="btnLogout" src="@/assets/logout.png" alt="" class="logout" @click="logout">
 
     </div>
+    
     <button v-if="!btnLogout" @click="GoToLogIn" class="btLogIn">Log In / Register</button>
 
   </div>
@@ -55,7 +56,7 @@ export default {
            
        */
     posardades() {
-      if (sessionStorage.UserID && sessionStorage.APIKEY) {
+      if (sessionStorage.UserID && sessionStorage.APIKEY && sessionStorage.role) {
         this.btnLogout = true;
         return true;
       }

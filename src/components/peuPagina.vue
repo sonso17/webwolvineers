@@ -10,7 +10,7 @@
 
 <template>
     <div id="peuPaginaGeneral">
-        <div id="peuPaginaC"><a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA</a>  OwnTainer</div>
+        <div id="peuPaginaC"><a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA</a>  Fedac Wolvineers</div>
         <div id="peuPaginaC" @click="whoAmIRedirect()">Created by Aleix Poch</div>
     </div>
 </template>

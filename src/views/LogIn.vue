@@ -69,6 +69,8 @@ export default {
                 sessionStorage.setItem('UserID', response.data[0].user_id);
                 sessionStorage.setItem('APIKEY', response.data[0].APIKEY);
                 sessionStorage.setItem('user_role', response.data[0].user_role);
+                sessionStorage.setItem('user_name', response.data[0].user_name);
+
 
                 // Actualitzar l'estat del component amb les dades de resposta
                 this.userID = response.data[0].user_id;

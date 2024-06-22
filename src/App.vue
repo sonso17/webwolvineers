@@ -27,22 +27,22 @@ export default {
       this.apikey = logInDades.apikey
       this.user_role = logInDades.role
       this.user_name = logInDades.user_name
-      console.log(this.userID)
-      console.log(this.apikey)
-      console.log(this.userEmail)
     },
     
       comprovarSessio() {
-            if (sessionStorage.UserID && sessionStorage.APIKEY && sessionStorage.userEmail) {
+            if (sessionStorage.UserID && sessionStorage.APIKEY && sessionStorage.user_role) {
                 this.userID = sessionStorage.UserID;
                 this.apikey = sessionStorage.APIKEY;
-                this.userEmail = sessionStorage.userEmail;
+                this.user_role = sessionStorage.user_role;
+                this.user_name = sessionStorage.user_name;
                 this.boolSessio = true;
-                var logInDades = { userID: this.userID, apikey: this.apikey, email: this.userEmail }
+                var logInDades = { userID: this.userID, apikey: this.apikey, role: this.user_role, user_name: this.user_name }
+                // console.log("entra")
+
                 this.notifica(logInDades)
             }
             else {
-                console.log("entra")
+                // console.log("entra")
                 this.boolSessio = false;
             }
         }
@@ -67,12 +67,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  background-color: #3ddcdc;
+  background-color: pink;
   display: flex;
   flex-direction: column;
-  /* display: grid;
-    grid-template-rows: auto 1fr auto;
-    grid-template-columns: 100%; */
   min-height: 100vh;
 }
 
@@ -88,6 +85,13 @@ nav a {
 nav a.router-link-exact-active {
   color: #42b983;
 }
+
+/*ESTILS COMPONENTS INDIVIDUALS EX BUTONS */
+button{
+  background-color: #3ddcdc;
+}
+/*FI ESTICLS COMPONENTS INDIVIDUALS  */
+
 /*ESTILS CAPCALERA*/
 #generalHeader {
   position: relative;

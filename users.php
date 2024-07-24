@@ -319,7 +319,7 @@ function updateUser($APIKEY, $UserID, $user_data, $role){
             $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-            $senteciSQL = "SELECT user_id, APIKEY, user_role, profile_pic FROM users WHERE `user_email` = :user_email AND `pass` = :pass";
+            $senteciSQL = "SELECT user_id, APIKEY, user_role, profile_pic, user_name FROM users WHERE `user_email` = :user_email AND `pass` = :pass";
     
             $bdd = $conn->prepare($senteciSQL);
             $bdd->bindParam("user_email", $user_email); //aplico els parametres necessaris

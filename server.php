@@ -1,5 +1,7 @@
 <?php
 include 'users.php';
+include 'articles.php';
+include 'categories.php';
 
 class Server
 {
@@ -125,6 +127,21 @@ class Server
                         }
                     } else {
                         header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                }
+                else if ($recurs2 == "CreateArticle") {
+                    if ($method == "POST") {
+                        $put = json_decode(file_get_contents('php://input'), true);
+                        // var_dump($put);
+                        $missatge = createArticle($put, $userID);
+
+                        if ($missatge == true) {
+                            echo "Article created correctly";
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            echo "Article creation failed";
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                        }
                     }
                 }
             }

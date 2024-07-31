@@ -62,3 +62,12 @@ CREATE TABLE comentaris (
     article_id INT,
     FOREIGN KEY (article_id) REFERENCES articles(article_id) ON DELETE CASCADE
 );
+
+CREATE TABLE paetrons (
+    paetron_id INT AUTO_INCREMENT PRIMARY KEY,
+    paetron_name VARCHAR(100) NOT NULL UNIQUE,
+    paetron_logo VARCHAR(50),
+    paetron_link VARCHAR(250) NOT NULL,
+    user_id INT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);

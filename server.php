@@ -76,7 +76,7 @@ class Server
         }
         else
         {
-            $id = explode('.', $recurs1); //divideixo el valor passat del recurs1(apikey + userID)
+            $id = explode('.', $recurs1); //divideixo el valor passat del recurs1(apikey + userID + rol)
 
             $apikey = $id[0];
             $userID = $id[1];
@@ -85,6 +85,7 @@ class Server
             
             if (UserValidation($apikey, $userID, $role) == true) 
             {
+                /*----------------------------------------------------------USERS---------------------------------------------------------- */
                 if ($recurs2 == "UserInfo") {
                     if ($method == "GET") {
                         if ($identificador != "") { //si hi ha un identificador d'usuari
@@ -120,6 +121,14 @@ class Server
                             $put = json_decode(file_get_contents('php://input'), true);
                 
                             $message = updateUser($apikey,$userID, $put, $role);
+
+                            if ($message == true) {
+                                echo "user modified correctly";
+                                header('HTTP/1.1 200 OK');
+                            } else {
+                                echo "user modification failed";
+                                header('HTTP/1.1 417 EXPECTATION FAILED');
+                            }
                             
                         } else {
                             header('HTTP/1.1 417 EXPECTATION FAILED');
@@ -128,6 +137,80 @@ class Server
                     } else {
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
+                }
+                else if($recurs2 == "DeleteUser"){
+                    echo "delete user endpoint";
+                }
+                /*----------------------------------------------------------- CATEGORIES----------------------------------------------*/
+                else if($recurs2 == "CreateCategory"){
+                    if ($method == "POST") {
+                        $put = json_decode(file_get_contents('php://input'), true);
+                        $message = CreateCategory($put, $userID);
+
+                        if ($message == true) {
+                            echo "Category created correctly";
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            echo "category creation failed";
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                        }
+                    }
+                    else {
+                        header('HTTP/1.1 417 EXPECTATION FAILED');
+                        echo "Wrong method";
+                    }
+                }
+                else if($recurs2 == "ModifyCategory"){
+                    if ($method == "POST") {
+                        if ($identificador != "") { //si hi ha un identificador de categoria
+                            $put = json_decode(file_get_contents('php://input'), true);
+                            
+                            $message = ModifyCategory($put, $userID, $identificador, $role);
+
+                            if ($message == true) {
+                                echo "category modified correctly";
+                                header('HTTP/1.1 200 OK');
+                            } else {
+                                echo "category modification failed";
+                                header('HTTP/1.1 417 EXPECTATION FAILED');
+                            }
+                            
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "category identifier needed";
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                }
+                /*ficar a la part publica one category i all categories */
+                else if($recurs2 == "GetOneCategory"){
+                    if ($method == "GET") {
+                        if ($identificador != "") { //si hi ha un identificador de categoria
+                            $put = json_decode(file_get_contents('php://input'), true);
+                            echo json_encode(GetOneCategory($identificador)); //li passo l'api-key i el UserID
+                            header('HTTP/1.1 200 OK');  
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "category identifier needed";
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                }
+                else if($recurs2 == "GetAllCategories"){
+                    if ($method == "GET") {
+                            $put = json_decode(file_get_contents('php://input'), true);
+                            echo json_encode(GetAllCategories()); 
+                            header('HTTP/1.1 200 OK');  
+                        
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                }
+                else if($recurs2 == "DeleteCategory"){
+                   /*DeleteCategory */
+                   echo "Delete Category";
                 }
                 else if ($recurs2 == "CreateArticle") {
                     if ($method == "POST") {

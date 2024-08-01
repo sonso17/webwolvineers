@@ -49,15 +49,14 @@ function generarApiKey($length = 15) // Funciona OK
     */
 function register_user($user_data)
 {
-    
+
     $user_name = $user_data["data"][0]["UserName"];
     $user_email = $user_data["data"][0]["UserEmail"];
     $user_pass = $user_data["data"][0]["pass"];
     $user_role = $user_data["data"][0]["UserRole"];
     $user_pic = $user_data["data"][0]["ProfilePic"];
 
-    if (isset($user_name) && isset($user_email) && isset($user_pass) && isset($user_role))
-    {
+    if (isset($user_name) && isset($user_email) && isset($user_pass) && isset($user_role)) {
         $baseDades = new BdD; //creo nova classe BDD
 
         try {
@@ -106,7 +105,8 @@ function register_user($user_data)
             Si no ha trobat cap usuari retornarà un missatge d'error
  
     */
-function selectOneUser($APIKEY, $UserID){
+function selectOneUser($APIKEY, $UserID)
+{
     $baseDades = new BdD; //creo nova classe BDD
 
     try {
@@ -150,7 +150,8 @@ function selectOneUser($APIKEY, $UserID){
             Retorna FALSE si no ha trobat cap usuari amb l'API-KEY passada o algo de la cosulta ha fallat
  
     */
-function UserValidation($apikey, $userID, $user_role){
+function UserValidation($apikey, $userID, $user_role)
+{
     $baseDades = new BdD; //creo nova classe BDD
 
     try {
@@ -166,7 +167,7 @@ function UserValidation($apikey, $userID, $user_role){
         $bdd->execute(); //executola sentencia
         $bdd->setFetchMode(PDO::FETCH_ASSOC);
         $resultat = $bdd->fetchAll(); //guardo els resultats
-        
+
         if (count($resultat) == 1) { // si ha trobat un usuari
             return true;
         } else {
@@ -190,9 +191,10 @@ function UserValidation($apikey, $userID, $user_role){
  
     */
 
-function selectAllUsers($APIKEY, $UserID){
-    if(selectOneUser($APIKEY, $UserID))
-    $baseDades = new BdD; //creo nova classe BDD
+function selectAllUsers($APIKEY, $UserID)
+{
+    if (selectOneUser($APIKEY, $UserID))
+        $baseDades = new BdD; //creo nova classe BDD
 
     try {
         $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
@@ -206,8 +208,7 @@ function selectAllUsers($APIKEY, $UserID){
         $resultat = $bdd->fetchAll(); //guardo els resultats
 
         // si ha trobat un usuari
-            return $resultat;
-       
+        return $resultat;
     } catch (PDOException $e) {
         echo "Error: " . $e->getMessage();
 
@@ -237,7 +238,8 @@ function selectAllUsers($APIKEY, $UserID){
             Retorna true si el update s'ha fet correctament i false si algo ha fallat
  
     */
-function updateUser($APIKEY, $UserID, $user_data, $role){
+function updateUser($APIKEY, $UserID, $user_data, $role)
+{
     $baseDades = new BdD; //creo nova classe BDD
     $user_name = $user_data["data"][0]["UserName"];
     $user_email = $user_data["data"][0]["UserEmail"];
@@ -307,37 +309,60 @@ function updateUser($APIKEY, $UserID, $user_data, $role){
             Retorna l'Ud d'usuari i la seva API-KEY
 
     */
-    function LogIn($user_data)
-    {
-    
-        //var_dump($user_data);
+function LogIn($user_data)
+{
+
+    //var_dump($user_data);
+    $baseDades = new BdD; //creo nova classe BDD
+    $user_email = $user_data["data"][0]["UserEmail"];
+    $user_pass = $user_data["data"][0]["pass"];
+
+    try {
+        $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $senteciSQL = "SELECT user_id, APIKEY, user_role, profile_pic, user_name FROM users WHERE `user_email` = :user_email AND `pass` = :pass";
+
+        $bdd = $conn->prepare($senteciSQL);
+        $bdd->bindParam("user_email", $user_email); //aplico els parametres necessaris
+        $bdd->bindParam("pass", $user_pass);
+        $bdd->execute(); //executola sentencia
+        $bdd->setFetchMode(PDO::FETCH_ASSOC);
+        $resultat = $bdd->fetchAll(); //guardo els resultats
+
+        if (count($resultat) == 1) { // si ha trobat un usuari
+            return $resultat;
+        } else {
+            return false;
+        }
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+
+        return false;
+    }
+
+    function DeleteUser($user_id){
         $baseDades = new BdD; //creo nova classe BDD
-        $user_email = $user_data["data"][0]["UserEmail"];
-        $user_pass = $user_data["data"][0]["pass"];
-    
+
         try {
             $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-            $senteciSQL = "SELECT user_id, APIKEY, user_role, profile_pic, user_name FROM users WHERE `user_email` = :user_email AND `pass` = :pass";
+            $senteciSQL = "DELETE FROM users user_id = :user_id";
     
             $bdd = $conn->prepare($senteciSQL);
-            $bdd->bindParam("user_email", $user_email); //aplico els parametres necessaris
-            $bdd->bindParam("pass", $user_pass);
+            $bdd->bindParam("user_id", $user_id); //aplico els parametres necessaris
             $bdd->execute(); //executola sentencia
             $bdd->setFetchMode(PDO::FETCH_ASSOC);
             $resultat = $bdd->fetchAll(); //guardo els resultats
     
-            if (count($resultat) == 1) { // si ha trobat un usuari
-                return $resultat;
-            } else {
-                return false;
-            }
+             // si ha trobat un usuari
+                return true;
+            
         } catch (PDOException $e) {
             echo "Error: " . $e->getMessage();
     
             return false;
         }
     }
-    
-?>
+}

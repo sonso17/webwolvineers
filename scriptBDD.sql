@@ -28,6 +28,7 @@ CREATE TABLE articles (
     article_status ENUM('draft', 'published', 'archived') NOT NULL,
     user_id INT,
     category_id INT,
+    user_name VARCHAR(100),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL
 );

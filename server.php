@@ -3,6 +3,7 @@ include 'users.php';
 include 'articles.php';
 include 'categories.php';
 include 'paetrons.php';
+include 'properties.php';
 
 class Server
 {
@@ -262,6 +263,76 @@ class Server
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
                 } else if ($recurs2 == "DeletePaetron") {
+                    if ($identificador != "") {
+                        $missatge = deletePaetron($identificador, $userID, $role);
+
+                        if ($missatge == true) {
+                            echo "paetron deleted correctly";
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            echo "paetron deletion failed or that paetron was not yours";
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                        }
+                    }
+                } else if ($recurs2 == "CreateProperty") {
+                    if ($method == "POST") {
+                        $put = json_decode(file_get_contents('php://input'), true);
+                        // var_dump($put);
+                        $missatge = addProperty($put, $userID);
+
+                        if ($missatge == true) {
+                            echo "Paetron created correctly";
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            echo "paetron creation failed";
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                } else if ($recurs2 == "ModifyProperty") {
+                    if ($method == "POST") {
+                        if ($identificador != "") { //si hi ha un identificador de categoria
+                            $put = json_decode(file_get_contents('php://input'), true);
+
+                            $message = ModifyPaetron($put, $userID, $identificador, $role);
+
+                            if ($message == true) {
+                                echo "paetron modified correctly";
+                                header('HTTP/1.1 200 OK');
+                            } else {
+                                echo "paetron modification failed";
+                                header('HTTP/1.1 417 EXPECTATION FAILED');
+                            }
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "paetron identifier needed";
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                } else if ($recurs2 == "GetOneProperty") {
+                    if ($method == "GET") {
+                        if ($identificador != "") { //si hi ha un identificador de categoria
+                            $put = json_decode(file_get_contents('php://input'), true);
+                            echo json_encode(GetOnePaetron($identificador)); //li passo l'api-key i el UserID
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "category identifier needed";
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                } else if ($recurs2 == "GetAllProperties") {
+                    if ($method == "GET") {
+                        // $put = json_decode(file_get_contents('php://input'), true);
+                        echo json_encode(GetAllPaetrons());
+                        header('HTTP/1.1 200 OK');
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                } else if ($recurs2 == "DeleteProperty") {
                     if ($identificador != "") {
                         $missatge = deletePaetron($identificador, $userID, $role);
 

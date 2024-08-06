@@ -1,9 +1,13 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import PaginaInici from '../views/PaginaInici.vue'
-import logIn from '../views/LogIn.vue'
-import userInfo from '../views/UserInfo.vue'
-import registerR from '../views/registerR.vue'
-import userModify from '../views/userModify.vue'
+import logIn from '../views/0LogIn.vue'
+import userInfo from '../views/0UserInfo.vue'
+import registerR from '../views/0registerR.vue'
+import userModify from '../views/0userModify.vue'
+
+import AllCategories from '@/views/1AllCategories.vue'
+import CreateCategory from '@/views/1CreateCategory.vue'
+import ModifyCategory from '@/views/1ModifyCategory.vue'
 
 const routes = [
   {
@@ -38,6 +42,21 @@ const routes = [
     path: '/modifyUser/:id',
     name: 'modifyUser',
     component: userModify
+  },
+  {
+    path: '/allCategories',
+    name: 'allCategories',
+    component: AllCategories
+  },
+  {
+    path: '/CreateCategory',
+    name: 'CreateCategory',
+    component: CreateCategory
+  },
+  {
+    path: '/ModifyCategory/:id',
+    name: 'ModifyCategory',
+    component: ModifyCategory
   }
 ]
 

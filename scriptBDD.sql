@@ -22,13 +22,14 @@ CREATE TABLE categories (
 
 CREATE TABLE articles (
     article_id INT AUTO_INCREMENT PRIMARY KEY,
-    visibility ENUM('public', 'private') NOT NULL,
+    visibility VARCHAR(30) NOT NULL,
     article_title VARCHAR(255) NOT NULL,
     descripcio TEXT,
-    article_status ENUM('draft', 'published', 'archived') NOT NULL,
+    article_status VARCHAR(30) NOT NULL,
     user_id INT,
     category_id INT,
     user_name VARCHAR(100),
+    article_code VARCHAR(50) UNIQUE,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL
 );

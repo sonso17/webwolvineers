@@ -71,7 +71,53 @@ class Server
             } else { //si el mètode es qualsevol altre cosa que POST
                 header('HTTP/1.1 405 Method Not Allowed');
             }
-        } else {
+        }
+        else if ($recurs1 == "GetOneCategory") {
+            if ($method == "GET") {
+                if ($recurs2 != "") { //si hi ha un identificador de categoria
+                    $put = json_decode(file_get_contents('php://input'), true);
+                    echo json_encode(GetOneCategory($recurs2)); //li passo l'api-key i el UserID
+                    header('HTTP/1.1 200 OK');
+                } else {
+                    header('HTTP/1.1 417 EXPECTATION FAILED');
+                    echo "category identifier needed";
+                }
+            } else {
+                header('HTTP/1.1 405 Method Not Allowed');
+            }
+        } else if ($recurs1 == "GetAllCategories") {
+            if ($method == "GET") {
+                $put = json_decode(file_get_contents('php://input'), true);
+                echo json_encode(GetAllCategories());
+                header('HTTP/1.1 200 OK');
+            } else {
+                header('HTTP/1.1 405 Method Not Allowed');
+            }
+        }
+        else if ($recurs1 == "GetOnePaetron") {
+            if ($method == "GET") {
+                if ($recurs2 != "") { //si hi ha un identificador de categoria
+                    $put = json_decode(file_get_contents('php://input'), true);
+                    echo json_encode(GetOnePaetron($recurs2)); //li passo l'api-key i el UserID
+                    header('HTTP/1.1 200 OK');
+                } else {
+                    header('HTTP/1.1 417 EXPECTATION FAILED');
+                    echo "category identifier needed";
+                }
+            } else {
+                header('HTTP/1.1 405 Method Not Allowed');
+            }
+        } else if ($recurs1 == "GetAllPaetrons") {
+            if ($method == "GET") {
+                // $put = json_decode(file_get_contents('php://input'), true);
+                echo json_encode(GetAllPaetrons());
+                header('HTTP/1.1 200 OK');
+            } else {
+                header('HTTP/1.1 405 Method Not Allowed');
+            }
+        }
+        
+        else {
             $id = explode('.', $recurs1); //divideixo el valor passat del recurs1(apikey + userID + rol)
 
             $apikey = $id[0];
@@ -179,28 +225,8 @@ class Server
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
                 }
-                /*ficar a la part publica one category i all categories */ else if ($recurs2 == "GetOneCategory") {
-                    if ($method == "GET") {
-                        if ($identificador != "") { //si hi ha un identificador de categoria
-                            $put = json_decode(file_get_contents('php://input'), true);
-                            echo json_encode(GetOneCategory($identificador)); //li passo l'api-key i el UserID
-                            header('HTTP/1.1 200 OK');
-                        } else {
-                            header('HTTP/1.1 417 EXPECTATION FAILED');
-                            echo "category identifier needed";
-                        }
-                    } else {
-                        header('HTTP/1.1 405 Method Not Allowed');
-                    }
-                } else if ($recurs2 == "GetAllCategories") {
-                    if ($method == "GET") {
-                        $put = json_decode(file_get_contents('php://input'), true);
-                        echo json_encode(GetAllCategories());
-                        header('HTTP/1.1 200 OK');
-                    } else {
-                        header('HTTP/1.1 405 Method Not Allowed');
-                    }
-                } else if ($recurs2 == "DeleteCategory") {
+                /*ficar a la part publica one category i all categories */ 
+                 else if ($recurs2 == "DeleteCategory") {
                     /*DeleteCategory */
                     echo "Delete Category";
                 }
@@ -238,27 +264,6 @@ class Server
                             header('HTTP/1.1 417 EXPECTATION FAILED');
                             echo "paetron identifier needed";
                         }
-                    } else {
-                        header('HTTP/1.1 405 Method Not Allowed');
-                    }
-                } else if ($recurs2 == "GetOnePaetron") {
-                    if ($method == "GET") {
-                        if ($identificador != "") { //si hi ha un identificador de categoria
-                            $put = json_decode(file_get_contents('php://input'), true);
-                            echo json_encode(GetOnePaetron($identificador)); //li passo l'api-key i el UserID
-                            header('HTTP/1.1 200 OK');
-                        } else {
-                            header('HTTP/1.1 417 EXPECTATION FAILED');
-                            echo "category identifier needed";
-                        }
-                    } else {
-                        header('HTTP/1.1 405 Method Not Allowed');
-                    }
-                } else if ($recurs2 == "GetAllPaetrons") {
-                    if ($method == "GET") {
-                        // $put = json_decode(file_get_contents('php://input'), true);
-                        echo json_encode(GetAllPaetrons());
-                        header('HTTP/1.1 200 OK');
                     } else {
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
@@ -357,6 +362,39 @@ class Server
                             echo "Article creation failed";
                             header('HTTP/1.1 417 EXPECTATION FAILED');
                         }
+                    }
+                }
+                else if($recurs2 == "SelectAllArticles"){
+                    if ($method == "GET") {
+                        // $put = json_decode(file_get_contents('php://input'), true);
+                        echo json_encode(getAllArticles());
+                        header('HTTP/1.1 200 OK');
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                }
+                else if ($recurs2 == "SelectOneArticle") {
+                    if ($method == "GET") {
+                        if ($identificador != "") { //si hi ha un identificador de categoria
+                            $put = json_decode(file_get_contents('php://input'), true);
+                            echo json_encode(getOneArticle($identificador)); //li passo l'api-key i el UserID
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "article identifier needed";
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                }
+                else if ($recurs2 == "SelectArticlesBySearch") {
+                    if ($method == "POST") {
+                        $put = json_decode(file_get_contents('php://input'), true);
+                        $searchWord = $put["data"]["SearchWord"];
+                        // var_dump($searchWord);
+                        echo json_encode(getArticlesBySearch($searchWord));
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
                     }
                 }
             }

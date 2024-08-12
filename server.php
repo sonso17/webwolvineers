@@ -71,8 +71,7 @@ class Server
             } else { //si el mètode es qualsevol altre cosa que POST
                 header('HTTP/1.1 405 Method Not Allowed');
             }
-        }
-        else if ($recurs1 == "GetOneCategory") {
+        } else if ($recurs1 == "GetOneCategory") {
             if ($method == "GET") {
                 if ($recurs2 != "") { //si hi ha un identificador de categoria
                     $put = json_decode(file_get_contents('php://input'), true);
@@ -93,8 +92,7 @@ class Server
             } else {
                 header('HTTP/1.1 405 Method Not Allowed');
             }
-        }
-        else if ($recurs1 == "GetOnePaetron") {
+        } else if ($recurs1 == "GetOnePaetron") {
             if ($method == "GET") {
                 if ($recurs2 != "") { //si hi ha un identificador de categoria
                     $put = json_decode(file_get_contents('php://input'), true);
@@ -115,9 +113,7 @@ class Server
             } else {
                 header('HTTP/1.1 405 Method Not Allowed');
             }
-        }
-        
-        else {
+        } else {
             $id = explode('.', $recurs1); //divideixo el valor passat del recurs1(apikey + userID + rol)
 
             $apikey = $id[0];
@@ -225,8 +221,7 @@ class Server
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
                 }
-                /*ficar a la part publica one category i all categories */ 
-                 else if ($recurs2 == "DeleteCategory") {
+                /*ficar a la part publica one category i all categories */ else if ($recurs2 == "DeleteCategory") {
                     /*DeleteCategory */
                     echo "Delete Category";
                 }
@@ -363,8 +358,7 @@ class Server
                             header('HTTP/1.1 417 EXPECTATION FAILED');
                         }
                     }
-                }
-                else if($recurs2 == "SelectAllArticles"){
+                } else if ($recurs2 == "SelectAllArticles") {
                     if ($method == "GET") {
                         // $put = json_decode(file_get_contents('php://input'), true);
                         echo json_encode(getAllArticles());
@@ -372,8 +366,7 @@ class Server
                     } else {
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
-                }
-                else if ($recurs2 == "SelectOneArticle") {
+                } else if ($recurs2 == "SelectOneArticle") {
                     if ($method == "GET") {
                         if ($identificador != "") { //si hi ha un identificador de categoria
                             $put = json_decode(file_get_contents('php://input'), true);
@@ -386,8 +379,7 @@ class Server
                     } else {
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
-                }
-                else if ($recurs2 == "SelectArticlesBySearch") {
+                } else if ($recurs2 == "SelectArticlesBySearch") {
                     if ($method == "POST") {
                         $put = json_decode(file_get_contents('php://input'), true);
                         $searchWord = $put["data"]["SearchWord"];
@@ -395,6 +387,40 @@ class Server
                         echo json_encode(getArticlesBySearch($searchWord));
                     } else {
                         header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                } else if ($recurs2 == "ModifyArticle") {
+                    if ($method == "POST") {
+                        if ($identificador != "") { //si hi ha un identificador de categoria
+                            $put = json_decode(file_get_contents('php://input'), true);
+
+                            $message = modifyArticle($put, $userID, $identificador, $role);
+
+                            if ($message == true) {
+                                echo "article modified correctly";
+                                header('HTTP/1.1 200 OK');
+                            } else {
+                                echo "article modification failed";
+                                header('HTTP/1.1 417 EXPECTATION FAILED');
+                            }
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "article identifier needed";
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                }
+                else if ($recurs2 == "DeleteArticle") {
+                    if ($identificador != "") {
+                        $missatge = deleteArticle($identificador, $userID, $role);
+
+                        if ($missatge == true) {
+                            echo "article deleted correctly";
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            echo "article deletion failed or that paetron was not yours";
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                        }
                     }
                 }
             }

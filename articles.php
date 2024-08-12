@@ -19,7 +19,7 @@ function generarCodiArticle($length = 25) // Funciona OK
 
 function createArticle($articleDades, $userID)
 {
-    // var_dump($articleDades);
+
     //separo les dades a inserir a la taula Components
     $articleVisibility = $articleDades['data']['visibility'];
     $articleTitle = $articleDades['data']['article_title'];
@@ -83,19 +83,19 @@ function createArticle($articleDades, $userID)
             $articleID = $resultatArtID[0]['article_id'];
 
             for ($a = 0; $a < $dataArrayLength; $a++) {
-                $sentenciaCompProps =
+                $sentenciaArticlesProps =
                     "
                 INSERT INTO propertiesxarticles (article_value, position, property_id, article_id)
                 VALUES (:article_value, :position, :property_id, :article_id);
                 ";
-                $bdd = $conn->prepare($sentenciaCompProps);
+                $bdd = $conn->prepare($sentenciaArticlesProps);
                 $bdd->bindParam("article_value", $articlePropsVal[$a]); //aplico els parametres necessaris
                 $bdd->bindParam("position", $articlePosition[$a]);
                 $bdd->bindParam("property_id", $articlePropsId[$a]);
                 $bdd->bindParam("article_id", $articleID);
                 $bdd->execute(); //executola sentencia
-                $bdd->setFetchMode(PDO::FETCH_ASSOC);
-                $resultatCompID = $bdd->fetchAll(); //guardo els resultats
+                // $bdd->setFetchMode(PDO::FETCH_ASSOC);
+                // $resultatCompID = $bdd->fetchAll(); //guardo els resultats
             }
             return $boolEstat; //ha anat tot bé
         } else {
@@ -109,12 +109,170 @@ function createArticle($articleDades, $userID)
 }
 
 //Funcions de modificar i eliminar articles()
-function updateArticle()
+function modifyArticle($articleDades, $user_id, $articleID, $userRole)
 {
+    $baseDades = new BdD; //creo nova classe BDD
+
+    try {
+        $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        //comprovar de que el component sigui de l'usuari
+        $senteciaVerificacioArticleUser =
+            "
+            SELECT user_id FROM `articles` where article_id = :article_id;
+            ";
+        $bdd = $conn->prepare($senteciaVerificacioArticleUser);
+        $bdd->bindParam("article_id", $articleID); //aplico els parametres necessaris
+        $bdd->execute(); //executola sentencia
+        $bdd->setFetchMode(PDO::FETCH_ASSOC);
+        $UserArtID = $bdd->fetchAll(); //guardo els resultats
+        $UserArtIDBaseDades = $UserArtID[0]['user_id'];
+        // var_dump($UserArtIDBaseDades);
+
+        //Comprovem de que el userID passat per parametre sigui el mateix usuariID que el del component de la BDD que es vol modificar
+        if ($user_id == $UserArtIDBaseDades || $userRole == "admin") {
+            //extreiem la informació que actualitzarem a la taula de components
+
+            $articleVisibility = $articleDades['data']['visibility'];
+            $articleTitle = $articleDades['data']['article_title'];
+            $articleDescription = $articleDades['data']['descripcio'];
+            $articleStatus = $articleDades['data']['article_status'];
+            $articleCategoryID = $articleDades['data']['category_id'];
+
+            // var_dump($articleDescription);
+
+            $articlePropsId = []; //array on guardo tots els IDs de les propiestats de cada article
+            $articlePropsVal = []; //array on vaig guardant els valors de les propietats dels components
+            $articlePosition = []; //array on hi vaig guardant els IDs de les propietats dels components
+            $idPKPXA = []; //vaig guardant totes les claus primàries de la taula componentxproperties
+
+            $dataArrayLength = sizeof($articleDades['data']['props']);
+
+            for ($i = 0; $i < $dataArrayLength; $i++) { //Bucle on vaig guardant cada informació al seu lloc
+                array_push($articlePropsVal, $articleDades['data']['props'][$i]['prop_val']);
+                array_push($articlePropsId, $articleDades['data']['props'][$i]['prop_id']);
+                array_push($articlePosition, $articleDades['data']['props'][$i]['position']);
+            }
+
+            // //Extrect totes les claus primàries dels registres dels valors del component(PKPXC)
+            $senteciaExtreurePKPXA =
+                "
+            SELECT PKPXA 
+            FROM `propertiesxarticles`
+            WHERE article_id = :article_id;
+            ";
+            $bdd = $conn->prepare($senteciaExtreurePKPXA);
+            $bdd->bindParam("article_id", $articleID);
+            $bdd->execute(); //executola sentencia
+            $bdd->setFetchMode(PDO::FETCH_ASSOC);
+            $resultatPKPXA = $bdd->fetchAll(); //guardo els resultats
+
+            // aixi saber quines posicions haig de modificar i que tots els registres no acabin amb el mateix valor
+            for ($e = 0; $e < sizeof($resultatPKPXA); $e++) {
+                array_push($idPKPXA, $resultatPKPXA[$e]['PKPXA']);
+            }
+
+            //Actualitzo els valors a la taula components
+            $sentenciaUpdateTArticles =
+                "
+                UPDATE articles
+                SET visibility = :visibility, article_title = :article_title, descripcio = :descripcio, article_status = :article_status, category_id = :category_id
+                WHERE article_id = :article_id;
+            ";
+
+            $bdd = $conn->prepare($sentenciaUpdateTArticles);
+            $bdd->bindParam("visibility", $articleVisibility);
+            $bdd->bindParam("article_title", $articleTitle);
+            $bdd->bindParam("descripcio", $articleDescription);
+            $bdd->bindParam("article_status", $articleStatus);
+            $bdd->bindParam("category_id", $articleCategoryID);
+            $bdd->bindParam("article_id", $articleID);
+            $bdd->execute(); //executola sentencia
+            $bdd->setFetchMode(PDO::FETCH_ASSOC);
+            $resultatTC = $bdd->fetchAll(); //guardo els resultats
+
+
+
+            // echo "entra";
+            for ($a = 0; $a < $dataArrayLength; $a++) {
+                $sentenciaTArticlesProps =
+                    "
+                        UPDATE `propertiesxarticles`
+                        SET article_value = :article_value, position = :position
+                        WHERE PKPXA = :PKPXA AND article_id = :article_id;
+                    ";
+
+                $bdd = $conn->prepare($sentenciaTArticlesProps);
+                $bdd->bindParam("article_value", $articlePropsVal[$a]); //aplico els parametres necessaris
+                $bdd->bindParam("position", $articlePosition[$a]);
+                $bdd->bindParam("PKPXA", $idPKPXA[$a]);
+                $bdd->bindParam("article_id", $articleID);
+                $bdd->execute(); //executola sentencia
+                // $bdd->setFetchMode(PDO::FETCH_ASSOC);
+                // $resultatCompID = $bdd->fetchAll(); //guardo els resultats
+            }
+            // si l'actualització del component s'ha fet correctament
+            return true;
+        } else { //si el component és d'un altre usuari
+            return false;
+        }
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        return false;
+    }
 }
 
-function deleteArticle()
+function deleteArticle($articleID, $user_id, $userRole)
 {
+    $baseDades = new BdD; //creo nova classe BDD
+
+    try {
+        $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        //varificar de que el IDusuari passat per paràmetre sigui el mateix 
+        //comprovar de que el component sigui de l'usuari
+        $senteciaVerificacioArticleUser =
+            "
+        SELECT user_id FROM `articles` where article_id = :article_id;
+        ";
+        $bdd = $conn->prepare($senteciaVerificacioArticleUser);
+        $bdd->bindParam("article_id", $articleID); //aplico els parametres necessaris
+        $bdd->execute(); //executola sentencia
+        $bdd->setFetchMode(PDO::FETCH_ASSOC);
+        $UserArtID = $bdd->fetchAll(); //guardo els resultats
+        $UserArtIDBaseDades = $UserArtID[0]['user_id'];
+        // var_dump($UserArtIDBaseDades);
+
+        //Comprovem de que el userID passat per parametre sigui el mateix usuariID que el del component de la BDD que es vol modificar
+        if ($user_id == $UserArtIDBaseDades || $userRole == "admin") {
+            //anar eliminant les taules, Començaré per propertiesxarticles i despres el registre de la taula articles
+            $sentenciaDeleteTAXP =
+                "
+            DELETE FROM `propertiesxarticles` WHERE article_id = :article_id;
+            ";
+            $bdd = $conn->prepare($sentenciaDeleteTAXP);
+            $bdd->bindParam("article_id", $articleID); //aplico els parametres necessaris
+            $bdd->execute(); //executola sentencia
+            $bdd->setFetchMode(PDO::FETCH_ASSOC);
+
+            $sentenciaDeleteTArticles =
+                "
+            DELETE FROM `articles` WHERE article_id = :article_id;
+            ";
+            $bdd = $conn->prepare($sentenciaDeleteTArticles);
+            $bdd->bindParam("article_id", $articleID); //aplico els parametres necessaris
+            $bdd->execute(); //executola sentencia
+            $bdd->setFetchMode(PDO::FETCH_ASSOC);
+        } else {
+            return false;
+        }
+        return true;
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        return false;
+    }
 }
 
 //funció per seleccionar TOT un article

@@ -4,6 +4,7 @@ include 'articles.php';
 include 'categories.php';
 include 'paetrons.php';
 include 'properties.php';
+include 'comentaris.php';
 
 class Server
 {
@@ -100,7 +101,7 @@ class Server
                     header('HTTP/1.1 200 OK');
                 } else {
                     header('HTTP/1.1 417 EXPECTATION FAILED');
-                    echo "category identifier needed";
+                    echo "paetron identifier needed";
                 }
             } else {
                 header('HTTP/1.1 405 Method Not Allowed');
@@ -369,8 +370,8 @@ class Server
                 } else if ($recurs2 == "SelectOneArticle") {
                     if ($method == "GET") {
                         if ($identificador != "") { //si hi ha un identificador de categoria
-                            $put = json_decode(file_get_contents('php://input'), true);
-                            echo json_encode(getOneArticle($identificador)); //li passo l'api-key i el UserID
+                            // $put = json_decode(file_get_contents('php://input'), true);
+                            echo json_encode(getOneArticle($identificador, $userID)); //li passo l'api-key i el UserID
                             header('HTTP/1.1 200 OK');
                         } else {
                             header('HTTP/1.1 417 EXPECTATION FAILED');
@@ -409,8 +410,7 @@ class Server
                     } else {
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
-                }
-                else if ($recurs2 == "DeleteArticle") {
+                } else if ($recurs2 == "DeleteArticle") {
                     if ($identificador != "") {
                         $missatge = deleteArticle($identificador, $userID, $role);
 
@@ -421,6 +421,35 @@ class Server
                             echo "article deletion failed or that paetron was not yours";
                             header('HTTP/1.1 417 EXPECTATION FAILED');
                         }
+                    }
+                } else if ($recurs2 == "AddComment") {
+                    // echo "entra";
+                    if ($method == "POST") {
+                        if ($identificador != "") {
+                            $put = json_decode(file_get_contents('php://input'), true);
+                            // var_dump($put);
+                            $missatge = CreateComentari($put);
+
+                            if ($missatge == true) {
+                                echo "comment created correctly";
+                                header('HTTP/1.1 200 OK');
+                            } else {
+                                echo "comment creation failed";
+                                header('HTTP/1.1 417 EXPECTATION FAILED');
+                            }
+                        }
+                    }
+                } else if ($recurs2 == "GetComentsByArticle") {
+                    if ($method == "GET") {
+                        if ($identificador != "") {
+                            echo json_encode(GetComentsByArticle($identificador));
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "article identifier needed";
+                        }
+                    }
+                    else{
+                        header('HTTP/1.1 405 Method Not Allowed');
                     }
                 }
             }

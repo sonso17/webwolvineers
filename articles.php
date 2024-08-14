@@ -38,6 +38,9 @@ function createArticle($articleDades, $userID)
         array_push($articlePropsId, $articleDades['data']['props'][$i]['prop_id']);
         array_push($articlePosition, $articleDades['data']['props'][$i]['position']);
     }
+    var_dump($articlePropsId);
+    var_dump($articlePosition);
+    var_dump($articlePropsVal);
 
     $articleCode = generarCodiArticle();
 
@@ -81,6 +84,7 @@ function createArticle($articleDades, $userID)
             $bdd->setFetchMode(PDO::FETCH_ASSOC);
             $resultatArtID = $bdd->fetchAll(); //guardo els resultats
             $articleID = $resultatArtID[0]['article_id'];
+            
 
             for ($a = 0; $a < $dataArrayLength; $a++) {
                 $sentenciaArticlesProps =
@@ -94,8 +98,8 @@ function createArticle($articleDades, $userID)
                 $bdd->bindParam("property_id", $articlePropsId[$a]);
                 $bdd->bindParam("article_id", $articleID);
                 $bdd->execute(); //executola sentencia
-                // $bdd->setFetchMode(PDO::FETCH_ASSOC);
-                // $resultatCompID = $bdd->fetchAll(); //guardo els resultats
+                $bdd->setFetchMode(PDO::FETCH_ASSOC);
+                $resultatCompID = $bdd->fetchAll(); //guardo els resultats
             }
             return $boolEstat; //ha anat tot bé
         } else {
@@ -279,20 +283,94 @@ function deleteArticle($articleID, $user_id, $userRole)
 function getOneArticle($article_id)
 {
     $baseDades = new BdD; //creo nova classe BDD
+
     try {
         $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        //faig una sentencia on selecciono per cada propietat el id de tipus, nom tipus component, idPropietat, nomPropietat i propietat tipus fent 2 joins, un a cada taula on haig d'extreure la informacio
+        $sentencia = "
+            SELECT articles.user_id, articles.article_pic, articles.visibility, articles.article_title, articles.descripcio, articles.article_status, 
+            articles.category_id, articles.user_name, articles.article_id, properties.property_id,properties.property_name, 
+            propertiesxarticles.article_value, propertiesxarticles.position
+            FROM propertiesxarticles
+            RIGHT JOIN articles ON propertiesxarticles.article_id =  articles.article_id
+            LEFT JOIN properties ON propertiesxarticles.property_id = properties.property_id
+            WHERE articles.article_id = :article_id;
+            ";
 
-        $senteciSQL = "SELECT * FROM articles WHERE `article_id` = :article_id";
-
-        $bdd = $conn->prepare($senteciSQL);
+        $bdd = $conn->prepare($sentencia);
         $bdd->bindParam("article_id", $article_id); //aplico els parametres necessaris
         $bdd->execute(); //executola sentencia
         $bdd->setFetchMode(PDO::FETCH_ASSOC);
         $resultat = $bdd->fetchAll(); //guardo els resultats
-        return $resultat;
+
+        $userIdArticle = $resultat[0]['user_id'];
+        $articleVisibility = $resultat[0]['visibility'];
+        $articleTitle = $resultat[0]['article_title'];
+        $articleDescription = $resultat[0]['descripcio'];
+        $articleStatus = $resultat[0]['article_status'];
+        $articleCategoryId = $resultat[0]['category_id'];
+        $articleUserName = $resultat[0]['user_name'];
+        $articleID = $resultat[0]['article_id'];
+        $articlePic = $resultat[0]['article_pic'];
+
+        //carrego dos arrays buits 
+        $arrAllArts = []; //en aquest hi guardaré tota la informació de cada component que hi vagi guardant(array general)
+        $arrArtProp = []; //en aquest hi guardare totes les propietats de cada component
+        $arrIdsArtticles = []; //array unicament d'IDs de component
+
+        foreach ($resultat as $i) { //aquest foreach serveix unicament per a guardar els IDs de cada component
+
+            $idArt = $i['article_id']; //agafo l'id de component
+
+            if (!in_array($idArt, $arrIdsArtticles)) { //comprovo de que el id no estigui repetit, in_array ens diu si el valor passat està a dins de l'array
+                array_push($arrIdsArtticles, $idArt); //si no esta repetit, el guardo
+            }
+        }
+
+        $lenId = sizeof($arrIdsArtticles); //aquest lenID de lengthID, ens guarda la longitud de tots els IDs guardats 
+        for ($i = 0; $i < $lenId; $i++) { //iterem tots els IDs 
+
+            $arrayTotUnArticle = [];
+            $arrArtProp = [];
+
+            foreach ($resultat as $el) { //iterem tota la consulta(ja que hi han moltes files amb el mateix componentID)
+
+                $idArt = $el['article_id']; //ectrec el idComponent de l'iteració del moment
+                if ($idArt == $arrIdsArtticles[$i]) { //si el idCom és igual al valor de la posició de l'array d'IDs
+
+                    $arrayProp = array( //guarden les propietats del ID trobat a l'array indexat
+                        "prop_id" => $el['property_id'],
+                        "prop_val" => $el['article_value'],
+                        "position" => $el['position']
+                    );
+                    array_push($arrArtProp, $arrayProp); //guardem les propietats de cada component
+                }
+            }
+            
+            $arrayTotUnArticle = array( //agafo les propietats no variables de cada component a l'array indexat i els hi aplico
+                "article_id" => $arrIdsArtticles[$i],
+                "user_id" => $userIdArticle,
+                "visibility" => $articleVisibility,
+                "category_id" => $articleCategoryId,
+                "article_user_name" => $articleUserName,
+                "article_title" => $articleTitle,
+                "descripcio" => $articleDescription,
+                "article_status" => $articleStatus,
+                "article_pic" => $articlePic,
+                "props" => $arrArtProp
+            );
+            array_push($arrAllArts, $arrayTotUnArticle); //aquest array.push representa un push de tot un component
+        }
+
+        // var_dump($arrAllArts);
+        // echo json_encode($arrAllArts);
+            return $arrAllArts;
+        
     } catch (PDOException $e) {
         echo "Error: " . $e->getMessage();
+
+        return false;
     }
 }
 

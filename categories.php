@@ -75,7 +75,6 @@ function ModifyCategory($category_dades, $User_id, $category_id, $role)
 
         if (count($resultat) == 1) { // si ha trobat una categoria existent
             // verificarem que l'usuari que modifica la categoria sigui el mateix que el propietari de la categoria
-
             $user_id_category = $resultat[0]["user_id"];
 
             if ($user_id_category == $User_id || $role == "Admin") {

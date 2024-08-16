@@ -63,6 +63,7 @@ CREATE TABLE comentaris (
     comment_id INT AUTO_INCREMENT PRIMARY KEY,
     coment_text TEXT NOT NULL,
     article_id INT,
+    user_name VARCHAR(250),
     FOREIGN KEY (article_id) REFERENCES articles(article_id) ON DELETE CASCADE
 );
 

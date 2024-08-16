@@ -2,7 +2,6 @@
 
 function addProperty($category_dades, $User_id)
 {
-
     $baseDades = new BdD; //creo nova classe BDD
 
     $category_name = $category_dades["data"][0]["CategoryName"];
@@ -17,7 +16,6 @@ function addProperty($category_dades, $User_id)
         $bdd = $conn->prepare($sentenciaSQL);
         $bdd->bindParam("property_name", $category_name);
         $bdd->bindParam("format", $User_id);
-
         $bdd->execute(); //executola sentencia
         $bdd->setFetchMode(PDO::FETCH_ASSOC);
 
@@ -27,7 +25,6 @@ function addProperty($category_dades, $User_id)
         return false;
     }
 }
-
 
 function getAllProperties()
 {

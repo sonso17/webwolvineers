@@ -84,7 +84,7 @@ function createArticle($articleDades, $userID)
             $bdd->setFetchMode(PDO::FETCH_ASSOC);
             $resultatArtID = $bdd->fetchAll(); //guardo els resultats
             $articleID = $resultatArtID[0]['article_id'];
-            
+
 
             for ($a = 0; $a < $dataArrayLength; $a++) {
                 $sentenciaArticlesProps =
@@ -347,7 +347,7 @@ function getOneArticle($article_id)
                     array_push($arrArtProp, $arrayProp); //guardem les propietats de cada component
                 }
             }
-            
+
             $arrayTotUnArticle = array( //agafo les propietats no variables de cada component a l'array indexat i els hi aplico
                 "article_id" => $arrIdsArtticles[$i],
                 "user_id" => $userIdArticle,
@@ -365,8 +365,7 @@ function getOneArticle($article_id)
 
         // var_dump($arrAllArts);
         // echo json_encode($arrAllArts);
-            return $arrAllArts;
-        
+        return $arrAllArts;
     } catch (PDOException $e) {
         echo "Error: " . $e->getMessage();
 
@@ -413,6 +412,64 @@ function getArticlesBySearch($searchWord)
 
         $bdd = $conn->prepare($sentencia);
         $bdd->bindParam("SearchValue2", $searchValue);
+        $bdd->execute(); //executola sentencia
+        $bdd->setFetchMode(PDO::FETCH_ASSOC);
+        $resultat = $bdd->fetchAll(); //guardo els resultats
+
+        return $resultat;
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        return false;
+    }
+}
+
+function GetPublicArticles()
+{
+
+    $baseDades = new BdD; //creo nova classe BDD
+
+    $articleStatus = "public";
+
+    try {
+        $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $sentencia = "
+        SELECT *
+        FROM articles
+        WHERE article_status = :article_status 
+        ORDER BY article_id ASC;
+        ";
+
+        $bdd = $conn->prepare($sentencia);
+        $bdd->bindParam("article_status", $articleStatus);
+        $bdd->execute(); //executola sentencia
+        $bdd->setFetchMode(PDO::FETCH_ASSOC);
+        $resultat = $bdd->fetchAll(); //guardo els resultats
+
+        return $resultat;
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        return false;
+    }
+}
+
+function GetUserArticles($userID) {
+    $baseDades = new BdD; //creo nova classe BDD
+
+    try {
+        $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $sentencia = "
+        SELECT *
+        FROM articles
+        WHERE user_id = :user_id
+        ORDER BY article_id ASC;
+        ";
+
+        $bdd = $conn->prepare($sentencia);
+        $bdd->bindParam("user_id", $userID);
         $bdd->execute(); //executola sentencia
         $bdd->setFetchMode(PDO::FETCH_ASSOC);
         $resultat = $bdd->fetchAll(); //guardo els resultats

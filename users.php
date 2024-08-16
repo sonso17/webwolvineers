@@ -311,8 +311,6 @@ function updateUser($APIKEY, $UserID, $user_data, $role)
     */
 function LogIn($user_data)
 {
-
-    //var_dump($user_data);
     $baseDades = new BdD; //creo nova classe BDD
     $user_email = $user_data["data"][0]["UserEmail"];
     $user_pass = $user_data["data"][0]["pass"];

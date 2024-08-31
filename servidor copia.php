@@ -37,8 +37,24 @@ class Server
         }
         //aqui anar posant endpoints publics
 
-        if ($recurs1 == "LogIn") {
+        if ($recurs1 == "register") { //posat
+            if ($method == 'POST') // validem que sigui per GET
+            { //agafo tota la info de l'usuari en JSON
+                $put = json_decode(file_get_contents('php://input'), true);
 
+                $message = register_user($put);
+
+                if ($message == true) {
+                    echo "user inserted correctly";
+                    header('HTTP/1.1 200 OK');
+                } else {
+                    echo "user registration failed";
+                    header('HTTP/1.1 417 EXPECTATION FAILED');
+                }
+            } else { //si el mètode es qualsevol altre cosa que POST
+                header('HTTP/1.1 405 Method Not Allowed');
+            }
+        } else if ($recurs1 == "LogIn") {//posat
             if ($method == 'POST') // validem que sigui per GET
             { //agafo tota la info de l'usuari en JSON
                 $put = json_decode(file_get_contents('php://input'), true);
@@ -54,19 +70,6 @@ class Server
                     header('HTTP/1.1 417 EXPECTATION FAILED');
                 }
             } else { //si el mètode es qualsevol altre cosa que POST
-                header('HTTP/1.1 405 Method Not Allowed');
-            }
-        } else if ($recurs1 == "SelectOnePublicArticle") {
-            if ($method == "GET") {
-                if ($identificador != "") { //si hi ha un identificador de categoria
-                    // $put = json_decode(file_get_contents('php://input'), true);
-                    echo json_encode(SelectOnePublicArticle($recurs2)); //li passo l'api-key i el UserID
-                    header('HTTP/1.1 200 OK');
-                } else {
-                    header('HTTP/1.1 417 EXPECTATION FAILED');
-                    echo "article identifier needed";
-                }
-            } else {
                 header('HTTP/1.1 405 Method Not Allowed');
             }
         } else if ($recurs1 == "GetOneCategory") {
@@ -111,83 +114,6 @@ class Server
             } else {
                 header('HTTP/1.1 405 Method Not Allowed');
             }
-        } else if ($recurs1 == "GetOneProperty") {
-            if ($method == "GET") {
-                if ($recurs2 != "") { //si hi ha un recurs$recurs2 de categoria
-                    $put = json_decode(file_get_contents('php://input'), true);
-                    echo json_encode(GetOnePaetron($recurs2)); //li passo l'api-key i el UserID
-                    header('HTTP/1.1 200 OK');
-                } else {
-                    header('HTTP/1.1 417 EXPECTATION FAILED');
-                    echo "category identifier needed";
-                }
-            } else {
-                header('HTTP/1.1 405 Method Not Allowed');
-            }
-        } else if ($recurs1 == "GetAllProperties") {
-            if ($method == "GET") {
-                // $put = json_decode(file_get_contents('php://input'), true);
-                echo json_encode(GetAllPaetrons());
-                header('HTTP/1.1 200 OK');
-            } else {
-                header('HTTP/1.1 405 Method Not Allowed');
-            }
-        } else if ($recurs2 == "SelectPublicArticles") {
-            if ($method == "GET") {
-                echo json_encode(GetPublicArticles());
-                header('HTTP/1.1 200 OK');
-            } else {
-                header('HTTP/1.1 405 Method Not Allowed');
-            }
-        } else if ($recurs1 == "SelectPublicArticlesBySearch") {
-            if ($method == "POST") {
-                $put = json_decode(file_get_contents('php://input'), true);
-                $searchWord = $put["data"]["SearchWord"];
-                // var_dump($searchWord);
-                echo json_encode(GetPublicArticlesBySearch($searchWord));
-            } else {
-                header('HTTP/1.1 405 Method Not Allowed');
-            }
-        } else if ($recurs1 == "SelectPublicArticlesByCategory") {
-            if ($method == "GET") {
-                if ($recurs2 != "") { //si hi ha un recurs$recurs2 de categoria
-                    $put = json_decode(file_get_contents('php://input'), true);
-                    echo json_encode(GetPublicArticlesByCategory($recurs2)); //li passo l'api-key i el UserID
-                    header('HTTP/1.1 200 OK');
-                } else {
-                    header('HTTP/1.1 417 EXPECTATION FAILED');
-                    echo "category identifier needed";
-                }
-            } else {
-                header('HTTP/1.1 405 Method Not Allowed');
-            }
-        } else if ($recurs1 == "AddComment") {
-            // echo "entra";
-            if ($method == "POST") {
-                if ($identificador != "") {
-                    $put = json_decode(file_get_contents('php://input'), true);
-                    $missatge = CreateComentari($put);
-
-                    if ($missatge == true) {
-                        echo "comment created correctly";
-                        header('HTTP/1.1 200 OK');
-                    } else {
-                        echo "comment creation failed";
-                        header('HTTP/1.1 417 EXPECTATION FAILED');
-                    }
-                }
-            }
-        } else if ($recurs1 == "GetComentsByArticle") {
-            if ($method == "GET") {
-                if ($recurs2 != "") {
-                    echo json_encode(GetComentsByArticle($recurs2));
-                } else {
-                    header('HTTP/1.1 417 EXPECTATION FAILED');
-                    echo "article identifier needed";
-                }
-            } else {
-                header('HTTP/1.1 405 Method Not Allowed');
-            }
         } else {
             $id = explode('.', $recurs1); //divideixo el valor passat del recurs1(apikey + userID + rol)
 
@@ -197,12 +123,24 @@ class Server
 
 
             if (UserValidation($apikey, $userID, $role) == true) {
-                // endpoints d'usuari
-
+                /*----------------------------------------------------------USERS---------------------------------------------------------- */
                 if ($recurs2 == "UserInfo") {
                     if ($method == "GET") {
                         if ($identificador != "") { //si hi ha un identificador d'usuari
                             echo json_encode(selectOneUser($apikey, $identificador)); //li passo l'api-key i el UserID
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "User identifier needed";
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                } else if ($recurs2 == "GetAllUsers") // MILLORAR CONDICIO DE CARES A FUTUR(AQUESTA NOMES POT ACCEDIR ROOT)
+                {
+                    if ($method == "GET") {
+                        if ($identificador != "") { //si hi ha un identificador d'usuari
+                            echo json_encode(selectAllUsers($apikey, $identificador)); //li passo l'api-key i el UserID
                             header('HTTP/1.1 200 OK');
                         } else {
                             header('HTTP/1.1 417 EXPECTATION FAILED');
@@ -232,7 +170,21 @@ class Server
                     } else {
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
-                } else if ($recurs2 == "CreateCategory") {
+                } else if ($recurs2 == "DeleteUser") {
+
+                    if ($identificador != "") {
+                        $missatge = DeleteUser($userID, $role);
+
+                        if ($missatge == true) {
+                            echo "User deleted correctly";
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            echo "User deletion failed or that paetron was not yours";
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                        }
+                    }
+                }
+                else if ($recurs2 == "CreateCategory") {
                     if ($method == "POST") {
                         $put = json_decode(file_get_contents('php://input'), true);
                         $message = CreateCategory($put, $userID);
@@ -269,7 +221,12 @@ class Server
                     } else {
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
-                } else if ($recurs2 == "CreatePaetron") {
+                }
+               else if ($recurs2 == "DeleteCategory") {
+                    /*DeleteCategory */
+                    echo "Delete Category";
+                }
+                else if ($recurs2 == "CreatePaetron") {
                     if ($method == "POST") {
                         $put = json_decode(file_get_contents('php://input'), true);
                         // var_dump($put);
@@ -305,6 +262,18 @@ class Server
                         }
                     } else {
                         header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                } else if ($recurs2 == "DeletePaetron") {
+                    if ($identificador != "") {
+                        $missatge = deletePaetron($identificador, $userID, $role);
+
+                        if ($missatge == true) {
+                            echo "paetron deleted correctly";
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            echo "paetron deletion failed or that paetron was not yours";
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                        }
                     }
                 } else if ($recurs2 == "CreateProperty") {
                     if ($method == "POST") {
@@ -343,6 +312,39 @@ class Server
                     } else {
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
+                } else if ($recurs2 == "GetOneProperty") {
+                    if ($method == "GET") {
+                        if ($identificador != "") { //si hi ha un identificador de categoria
+                            $put = json_decode(file_get_contents('php://input'), true);
+                            echo json_encode(GetOnePaetron($identificador)); //li passo l'api-key i el UserID
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "category identifier needed";
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                } else if ($recurs2 == "GetAllProperties") {
+                    if ($method == "GET") {
+                        // $put = json_decode(file_get_contents('php://input'), true);
+                        echo json_encode(GetAllPaetrons());
+                        header('HTTP/1.1 200 OK');
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                } else if ($recurs2 == "DeleteProperty") {
+                    if ($identificador != "") {
+                        $missatge = deletePaetron($identificador, $userID, $role);
+
+                        if ($missatge == true) {
+                            echo "paetron deleted correctly";
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            echo "paetron deletion failed or that paetron was not yours";
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                        }
+                    }
                 } else if ($recurs2 == "CreateArticle") {
                     if ($method == "POST") {
                         $put = json_decode(file_get_contents('php://input'), true);
@@ -356,6 +358,36 @@ class Server
                             echo "Article creation failed";
                             header('HTTP/1.1 417 EXPECTATION FAILED');
                         }
+                    }
+                } else if ($recurs2 == "SelectAllArticles") {
+                    if ($method == "GET") {
+                        // $put = json_decode(file_get_contents('php://input'), true);
+                        echo json_encode(getAllArticles());
+                        header('HTTP/1.1 200 OK');
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                } else if ($recurs2 == "SelectOneArticle") {
+                    if ($method == "GET") {
+                        if ($identificador != "") { //si hi ha un identificador de categoria
+                            // $put = json_decode(file_get_contents('php://input'), true);
+                            echo json_encode(getOneArticle($identificador, $userID)); //li passo l'api-key i el UserID
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "article identifier needed";
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                } else if ($recurs2 == "SelectArticlesBySearch") {
+                    if ($method == "POST") {
+                        $put = json_decode(file_get_contents('php://input'), true);
+                        $searchWord = $put["data"]["SearchWord"];
+                        // var_dump($searchWord);
+                        echo json_encode(getArticlesBySearch($searchWord));
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
                     }
                 } else if ($recurs2 == "ModifyArticle") {
                     if ($method == "POST") {
@@ -378,6 +410,26 @@ class Server
                     } else {
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
+                } else if ($recurs2 == "DeleteArticle") {
+                    if ($identificador != "") {
+                        $missatge = deleteArticle($identificador, $userID, $role);
+
+                        if ($missatge == true) {
+                            echo "article deleted correctly";
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            echo "article deletion failed or that paetron was not yours";
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                        }
+                    }
+                } else if ($recurs2 == "SelectPublicArticles") {
+                    if ($method == "GET") {
+
+                        echo json_encode(GetPublicArticles());
+                        header('HTTP/1.1 200 OK');
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
                 } else if ($recurs2 == "SelectUserArticles") {
                     if ($method == "GET") {
                         if ($userID != "") { //si hi ha un identificador de categoria
@@ -391,129 +443,66 @@ class Server
                     } else {
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
-                } else {
-                    if (UserValidation($apikey, $userID, $role) == true && $role == "Admin" || $role == "admin") {
-                        if ($recurs2 == "register") {
-                            if ($method == 'POST') // validem que sigui per GET
-                            { //agafo tota la info de l'usuari en JSON
-                                $put = json_decode(file_get_contents('php://input'), true);
+                } else if ($recurs2 == "AddComment") {
+                    // echo "entra";
+                    if ($method == "POST") {
+                        if ($identificador != "") {
+                            $put = json_decode(file_get_contents('php://input'), true);
+                            $missatge = CreateComentari($put);
 
-                                $message = register_user($put);
-
-                                if ($message == true) {
-                                    echo "user inserted correctly";
-                                    header('HTTP/1.1 200 OK');
-                                } else {
-                                    echo "user registration failed";
-                                    header('HTTP/1.1 417 EXPECTATION FAILED');
-                                }
-                            } else { //si el mètode es qualsevol altre cosa que POST
-                                header('HTTP/1.1 405 Method Not Allowed');
-                            }
-                        } else if ($recurs2 == "GetAllUsers") {
-                            if ($method == "GET") {
-                                if ($identificador != "") { //si hi ha un identificador d'usuari
-                                    echo json_encode(selectAllUsers($apikey, $identificador)); //li passo l'api-key i el UserID
-                                    header('HTTP/1.1 200 OK');
-                                } else {
-                                    header('HTTP/1.1 417 EXPECTATION FAILED');
-                                    echo "User identifier needed";
-                                }
-                            } else {
-                                header('HTTP/1.1 405 Method Not Allowed');
-                            }
-                        } else if ($recurs2 == "DeleteUser") {
-                            if ($identificador != "") {
-                                $missatge = DeleteUser($userID, $role);
-
-                                if ($missatge == true) {
-                                    echo "User deleted correctly";
-                                    header('HTTP/1.1 200 OK');
-                                } else {
-                                    echo "User deletion failed or that paetron was not yours";
-                                    header('HTTP/1.1 417 EXPECTATION FAILED');
-                                }
-                            }
-                        } else if ($recurs2 == "DeletePaetron") {
-                            if ($identificador != "") {
-                                $missatge = deletePaetron($identificador, $userID, $role);
-
-                                if ($missatge == true) {
-                                    echo "paetron deleted correctly";
-                                    header('HTTP/1.1 200 OK');
-                                } else {
-                                    echo "paetron deletion failed or that paetron was not yours";
-                                    header('HTTP/1.1 417 EXPECTATION FAILED');
-                                }
-                            }
-                        } else if ($recurs2 == "DeleteProperty") {
-                            if ($identificador != "") {
-                                $missatge = deletePaetron($identificador, $userID, $role);
-
-                                if ($missatge == true) {
-                                    echo "paetron deleted correctly";
-                                    header('HTTP/1.1 200 OK');
-                                } else {
-                                    echo "paetron deletion failed or that paetron was not yours";
-                                    header('HTTP/1.1 417 EXPECTATION FAILED');
-                                }
-                            }
-                        } else if ($recurs2 == "SelectAllArticles") {
-                            if ($method == "GET") {
-                                // $put = json_decode(file_get_contents('php://input'), true);
-                                echo json_encode(getAllArticles());
+                            if ($missatge == true) {
+                                echo "comment created correctly";
                                 header('HTTP/1.1 200 OK');
                             } else {
-                                header('HTTP/1.1 405 Method Not Allowed');
-                            }
-                        } else if ($recurs2 == "DeleteArticle") {
-                            if ($identificador != "") {
-                                $missatge = deleteArticle($identificador, $userID, $role);
-
-                                if ($missatge == true) {
-                                    echo "article deleted correctly";
-                                    header('HTTP/1.1 200 OK');
-                                } else {
-                                    echo "article deletion failed or that paetron was not yours";
-                                    header('HTTP/1.1 417 EXPECTATION FAILED');
-                                }
-                            }
-                        } else if ($recurs2 == "DeleteOneComment") {
-                            if ($identificador != "") {
-                                $missatge = DeleteOneComment($identificador);
-
-                                if ($missatge == true) {
-                                    echo "Comment deleted correctly";
-                                    header('HTTP/1.1 200 OK');
-                                } else {
-                                    echo "comment deletion failed or that paetron was not yours";
-                                    header('HTTP/1.1 417 EXPECTATION FAILED');
-                                }
-                            } else {
-                                header('HTTP/1.1 405 Method Not Allowed');
-                            }
-                        } else if ($recurs2 == "DeleteArticleComments") {
-                            if ($identificador != "") {
-                                $missatge = DeleteArticleComments($identificador);
-
-                                if ($missatge == true) {
-                                    echo "Comments deleted correctly";
-                                    header('HTTP/1.1 200 OK');
-                                } else {
-                                    echo "comments deletion failed or that paetron was not yours";
-                                    header('HTTP/1.1 417 EXPECTATION FAILED');
-                                }
-                            } else {
-                                header('HTTP/1.1 405 Method Not Allowed');
+                                echo "comment creation failed";
+                                header('HTTP/1.1 417 EXPECTATION FAILED');
                             }
                         }
+                    }
+                } else if ($recurs2 == "GetComentsByArticle") {
+                    if ($method == "GET") {
+                        if ($identificador != "") {
+                            echo json_encode(GetComentsByArticle($identificador));
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "article identifier needed";
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                } else if ($recurs2 == "DeleteOneComment") {
+                    if ($identificador != "") {
+                        $missatge = DeleteOneComment($identificador);
+
+                        if ($missatge == true) {
+                            echo "Comment deleted correctly";
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            echo "comment deletion failed or that paetron was not yours";
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
+                } else if ($recurs2 == "DeleteArticleComments") {
+                    if ($identificador != "") {
+                        $missatge = DeleteArticleComments($identificador);
+
+                        if ($missatge == true) {
+                            echo "Comments deleted correctly";
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            echo "comments deletion failed or that paetron was not yours";
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
                     }
                 }
             }
         }
     }
 }
-
 
 $server = new Server;
 $server->serve();

@@ -22,12 +22,15 @@ CREATE TABLE categories (
 
 CREATE TABLE articles (
     article_id INT AUTO_INCREMENT PRIMARY KEY,
-    visibility ENUM('public', 'private') NOT NULL,
+    visibility VARCHAR(30) NOT NULL,
     article_title VARCHAR(255) NOT NULL,
     descripcio TEXT,
-    article_status ENUM('draft', 'published', 'archived') NOT NULL,
+    article_status VARCHAR(30) NOT NULL,
     user_id INT,
     category_id INT,
+    user_name VARCHAR(100),
+    article_code VARCHAR(50) UNIQUE,
+    article_pic VARCHAR(150),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL
 );
@@ -60,5 +63,15 @@ CREATE TABLE comentaris (
     comment_id INT AUTO_INCREMENT PRIMARY KEY,
     coment_text TEXT NOT NULL,
     article_id INT,
+    user_name VARCHAR(250),
     FOREIGN KEY (article_id) REFERENCES articles(article_id) ON DELETE CASCADE
+);
+
+CREATE TABLE paetrons (
+    paetron_id INT AUTO_INCREMENT PRIMARY KEY,
+    paetron_name VARCHAR(100) NOT NULL UNIQUE,
+    paetron_logo VARCHAR(50),
+    paetron_link VARCHAR(250) NOT NULL,
+    user_id INT,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );

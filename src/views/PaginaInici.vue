@@ -2,27 +2,36 @@
   <div class="home">
     <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
     <h1>Users</h1><br>
-    <button @click="goToLogIn">Log In</button>
-    <button @click="goToUserInfo">user Info</button>
-    <button @click="goToRegister">Register</button>
-    <button @click="goToModifyUser">Modify User</button>
+    <div id="ButtonsUsers">
+      <button @click="goToLogIn">Log In</button>
+      <button @click="goToUserInfo">user Info</button>
+      <button @click="goToRegister">Register</button>
+      <button @click="goToModifyUser">Modify User</button>
+    </div>
+    <h1>Articles</h1><br>
+    <button @click="goToGetArticle">getArticle</button>
+    
+    <div v-if="boolSessio" id="ButtonsArticles">
+      <button @click="goToCreateArticle">Create Article</button>
+      <button @click="goToModifyArticle">ModifyArticle</button>
+    </div>
+
+    <h1>Articles:</h1>
+    <div id="articles"></div>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-
-
 export default {
   name: 'paginaInici',
   data() {
-        return {
-            userID: "",
-            apikey: "",
-            user_role: "",
-            boolSessio: false
-        }
-    },
+    return {
+      userID: "",
+      apikey: "",
+      user_role: "",
+      boolSessio: false
+    }
+  },
   methods: {
     goToLogIn() {
       this.$router.push('/login')
@@ -35,6 +44,14 @@ export default {
     },
     goToModifyUser() {
       this.$router.push('/modifyUser/' + this.userID)
+    },
+    goToCreateArticle() {
+      this.$router.push('/CreateArticle')
+    },
+    goToGetArticle() {
+      this.$router.push('/getArticle/1')
+    }, goToModifyArticle() {
+      this.$router.push('/modifyArticle/1')
     },
     comprovarSessio() {
       if (sessionStorage.UserID && sessionStorage.APIKEY && sessionStorage.user_role) {

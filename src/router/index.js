@@ -4,6 +4,9 @@ import logIn from '../views/LogIn.vue'
 import userInfo from '../views/UserInfo.vue'
 import registerR from '../views/registerR.vue'
 import userModify from '../views/userModify.vue'
+import createArticle from '@/views/createArticle.vue'
+import getArticle from '@/views/getArticle.vue'
+import modifyArticle from '@/views/modifyArticle.vue'
 
 const routes = [
   {
@@ -38,6 +41,21 @@ const routes = [
     path: '/modifyUser/:id',
     name: 'modifyUser',
     component: userModify
+  },
+  {
+    path: '/createArticle',
+    name: 'createArticle',
+    component: createArticle
+  },
+  {
+    path: '/getArticle/:id',
+    name: 'getArticle',
+    component: getArticle
+  },
+  {
+    path: '/modifyArticle/:id',
+    name: 'modifyArticle',
+    component: modifyArticle
   }
 ]
 

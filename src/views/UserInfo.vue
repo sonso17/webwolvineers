@@ -17,6 +17,8 @@
 
             <div id="divError"></div>
         </div>
+    <button @click="goToModifyUser">Modify User</button>
+        
    
 </template>
 

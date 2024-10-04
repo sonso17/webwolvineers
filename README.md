@@ -1,4 +1,4 @@
-ï»¿# Welcome to the wolvineers web api
+ÿþï»¿# Welcome to the wolvineers web api
 
 ## Hou to set up the API on a simple XAMPP:
 1- Install Xampp and download the API from the API branch. Also you may need Postman program for better testing.

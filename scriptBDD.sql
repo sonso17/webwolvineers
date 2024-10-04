@@ -31,6 +31,8 @@ CREATE TABLE articles (
     user_name VARCHAR(100),
     article_code VARCHAR(50) UNIQUE,
     article_pic VARCHAR(150),
+    creationDate DATE,
+    updateDate DATE,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL
 );

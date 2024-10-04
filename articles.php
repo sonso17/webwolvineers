@@ -19,6 +19,7 @@ function generarCodiArticle($length = 25) // Funciona OK
 
 function createArticle($articleDades, $userID)
 {
+    $mydate = getdate();
 
     //separo les dades a inserir a la taula Components
     $articleVisibility = $articleDades['data']['visibility'];
@@ -28,6 +29,7 @@ function createArticle($articleDades, $userID)
     $articleCategoryID = $articleDades['data']['category_id'];
     $user_name = $articleDades['data']['user_name'];
     $article_pic = $articleDades['data']['article_pic'];
+    $creation_date = $mydate['year'] . "-" . $mydate['mon'] . "-" . $mydate['mday'];
 
     $articlePropsId = []; //array on guardo tots els IDs de les propiestats de cada article
     $articlePropsVal = []; //array on vaig guardant els valors de les propietats dels components
@@ -40,9 +42,9 @@ function createArticle($articleDades, $userID)
         array_push($articlePropsId, $articleDades['data']['props'][$i]['prop_id']);
         array_push($articlePosition, $articleDades['data']['props'][$i]['position']);
     }
-    var_dump($articlePropsId);
-    var_dump($articlePosition);
-    var_dump($articlePropsVal);
+    // var_dump($articlePropsId);
+    // var_dump($articlePosition);
+    // var_dump($articlePropsVal);
 
     $articleCode = generarCodiArticle();
 
@@ -56,8 +58,8 @@ function createArticle($articleDades, $userID)
 
         $sentenciaTarticles =
             "
-        INSERT INTO articles (visibility, article_title, descripcio, article_status, user_id, category_id, user_name, article_code, article_pic)
-        VALUES (:visibility, :article_title, :descripcio, :article_status, :user_id, :category_id, :user_name, :article_code, :article_pic);
+        INSERT INTO articles (visibility, article_title, descripcio, article_status, user_id, category_id, user_name, article_code, article_pic, creationDate)
+        VALUES (:visibility, :article_title, :descripcio, :article_status, :user_id, :category_id, :user_name, :article_code, :article_pic, :creationDate);
         ";
 
         $bdd = $conn->prepare($sentenciaTarticles);
@@ -70,6 +72,7 @@ function createArticle($articleDades, $userID)
         $bdd->bindParam("user_name", $user_name);
         $bdd->bindParam("article_code", $articleCode);
         $bdd->bindParam("article_pic", $article_pic);
+        $bdd->bindParam("creationDate", $creation_date);
 
         $bdd->execute(); //executola sentencia
         $bdd->setFetchMode(PDO::FETCH_ASSOC);
@@ -142,6 +145,8 @@ function modifyArticle($articleDades, $user_id, $articleID, $userRole)
         //Comprovem de que el userID passat per parametre sigui el mateix usuariID que el del component de la BDD que es vol modificar
         if ($user_id == $UserArtIDBaseDades || $userRole == "admin") {
             //extreiem la informació que actualitzarem a la taula de components
+            $mydate = getdate();
+
 
             $articleVisibility = $articleDades['data']['visibility'];
             $articleTitle = $articleDades['data']['article_title'];
@@ -150,6 +155,8 @@ function modifyArticle($articleDades, $user_id, $articleID, $userRole)
             $articleCategoryID = $articleDades['data']['category_id'];
             $user_name = $articleDades['data']['user_name'];
             $article_pic = $articleDades['data']['article_pic'];
+            $update_date = $mydate['year'] . "-" . $mydate['mon'] . "-" . $mydate['mday'];
+
 
             // var_dump($articleDescription);
 
@@ -189,7 +196,7 @@ function modifyArticle($articleDades, $user_id, $articleID, $userRole)
                 "
                 UPDATE articles
                 SET visibility = :visibility, article_title = :article_title, descripcio = :descripcio, article_status = :article_status, category_id = :category_id, user_name = :user_name, article_pic = :article_pic
-                WHERE article_id = :article_id;
+                WHERE article_id = :article_id, updateDate = :update_date;
             ";
 
             $bdd = $conn->prepare($sentenciaUpdateTArticles);
@@ -199,9 +206,12 @@ function modifyArticle($articleDades, $user_id, $articleID, $userRole)
             $bdd->bindParam("article_status", $articleStatus);
             $bdd->bindParam("category_id", $articleCategoryID);
             $bdd->bindParam("user_name", $user_name);
-            $bdd->bindParam("article_pic", $article_pic
-        );
+            $bdd->bindParam(
+                "article_pic",
+                $article_pic
+            );
             $bdd->bindParam("article_id", $articleID);
+            $bdd->bindParam("update_date", $update_date);
             $bdd->execute(); //executola sentencia
             $bdd->setFetchMode(PDO::FETCH_ASSOC);
             $resultatTC = $bdd->fetchAll(); //guardo els resultats
@@ -464,7 +474,8 @@ function GetPublicArticles()
     }
 }
 
-function GetUserArticles($userID) {
+function GetUserArticles($userID)
+{
     $baseDades = new BdD; //creo nova classe BDD
 
     try {
@@ -491,7 +502,8 @@ function GetUserArticles($userID) {
     }
 }
 
-function GetArticlesByCategory($category_id){
+function GetArticlesByCategory($category_id)
+{
     $baseDades = new BdD; //creo nova classe BDD
 
     try {
@@ -518,7 +530,8 @@ function GetArticlesByCategory($category_id){
     }
 }
 
-function GetPublicArticlesByCategory($category_id){
+function GetPublicArticlesByCategory($category_id)
+{
     $baseDades = new BdD; //creo nova classe BDD
 
     try {
@@ -545,7 +558,8 @@ function GetPublicArticlesByCategory($category_id){
     }
 }
 
-function GetPublicArticlesBySearch($searchWord){
+function GetPublicArticlesBySearch($searchWord)
+{
     $searchValue = "%" . $searchWord . "%";
 
     $baseDades = new BdD; //creo nova classe BDD
@@ -572,10 +586,10 @@ function GetPublicArticlesBySearch($searchWord){
         echo "Error: " . $e->getMessage();
         return false;
     }
-
 }
 
-function SelectOnePublicArticle($article_id){
+function SelectOnePublicArticle($article_id)
+{
     $baseDades = new BdD; //creo nova classe BDD
 
     try {
@@ -665,5 +679,4 @@ function SelectOnePublicArticle($article_id){
 
         return false;
     }
-
 }

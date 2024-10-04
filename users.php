@@ -338,29 +338,58 @@ function LogIn($user_data)
 
         return false;
     }
+}
+function DeleteUser($user_id)
+{
+    $baseDades = new BdD; //creo nova classe BDD
 
-    function DeleteUser($user_id){
-        $baseDades = new BdD; //creo nova classe BDD
+    try {
+        $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        try {
-            $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-            $senteciSQL = "DELETE FROM users user_id = :user_id";
-    
-            $bdd = $conn->prepare($senteciSQL);
-            $bdd->bindParam("user_id", $user_id); //aplico els parametres necessaris
-            $bdd->execute(); //executola sentencia
-            $bdd->setFetchMode(PDO::FETCH_ASSOC);
-            $resultat = $bdd->fetchAll(); //guardo els resultats
-    
-             // si ha trobat un usuari
-                return true;
-            
-        } catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
-    
+        $senteciSQL = "DELETE FROM users user_id = :user_id";
+
+        $bdd = $conn->prepare($senteciSQL);
+        $bdd->bindParam("user_id", $user_id); //aplico els parametres necessaris
+        $bdd->execute(); //executola sentencia
+        $bdd->setFetchMode(PDO::FETCH_ASSOC);
+        $resultat = $bdd->fetchAll(); //guardo els resultats
+
+        // si ha trobat un usuari
+        return true;
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+
+        return false;
+    }
+}
+
+function getUserName($APIKEY, $UserID, $role)
+{
+    $baseDades = new BdD; //creo nova classe BDD
+
+    try {
+        $conn = new PDO("mysql:host=$baseDades->db_host;dbname=$baseDades->db_name", $baseDades->db_user, $baseDades->db_password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $senteciSQL = "SELECT user_name FROM users WHERE `user_id` = :UserID AND `APIKEY` = :APIKEY AND `user_role` = :role";
+
+        $bdd = $conn->prepare($senteciSQL);
+        $bdd->bindParam("UserID", $UserID); //aplico els parametres necessaris
+        $bdd->bindParam("APIKEY", $APIKEY);
+        $bdd->bindParam("role", $role);
+        $bdd->execute(); //executola sentencia
+        $bdd->setFetchMode(PDO::FETCH_ASSOC);
+        $resultat = $bdd->fetchAll(); //guardo els resultats
+
+        if (count($resultat) == 1) { // si ha trobat un usuari
+            return $resultat;
+        } else { //no ha trobat cap usuari
             return false;
         }
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+
+        return false;
     }
 }

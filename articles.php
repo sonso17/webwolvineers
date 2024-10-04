@@ -26,6 +26,8 @@ function createArticle($articleDades, $userID)
     $articleDescription = $articleDades['data']['descripcio'];
     $articleStatus = $articleDades['data']['article_status'];
     $articleCategoryID = $articleDades['data']['category_id'];
+    $user_name = $articleDades['data']['user_name'];
+    $article_pic = $articleDades['data']['article_pic'];
 
     $articlePropsId = []; //array on guardo tots els IDs de les propiestats de cada article
     $articlePropsVal = []; //array on vaig guardant els valors de les propietats dels components
@@ -54,8 +56,8 @@ function createArticle($articleDades, $userID)
 
         $sentenciaTarticles =
             "
-        INSERT INTO articles (visibility, article_title, descripcio, article_status, user_id, category_id, article_code)
-        VALUES (:visibility, :article_title, :descripcio, :article_status, :user_id, :category_id, :article_code);
+        INSERT INTO articles (visibility, article_title, descripcio, article_status, user_id, category_id, user_name, article_code, article_pic)
+        VALUES (:visibility, :article_title, :descripcio, :article_status, :user_id, :category_id, :user_name, :article_code, :article_pic);
         ";
 
         $bdd = $conn->prepare($sentenciaTarticles);
@@ -65,7 +67,10 @@ function createArticle($articleDades, $userID)
         $bdd->bindParam("article_status", $articleStatus);
         $bdd->bindParam("user_id", $userID);
         $bdd->bindParam("category_id", $articleCategoryID);
+        $bdd->bindParam("user_name", $user_name);
         $bdd->bindParam("article_code", $articleCode);
+        $bdd->bindParam("article_pic", $article_pic);
+
         $bdd->execute(); //executola sentencia
         $bdd->setFetchMode(PDO::FETCH_ASSOC);
         $resultatTC = $bdd->fetchAll(); //guardo els resultats
@@ -143,6 +148,8 @@ function modifyArticle($articleDades, $user_id, $articleID, $userRole)
             $articleDescription = $articleDades['data']['descripcio'];
             $articleStatus = $articleDades['data']['article_status'];
             $articleCategoryID = $articleDades['data']['category_id'];
+            $user_name = $articleDades['data']['user_name'];
+            $article_pic = $articleDades['data']['article_pic'];
 
             // var_dump($articleDescription);
 
@@ -181,7 +188,7 @@ function modifyArticle($articleDades, $user_id, $articleID, $userRole)
             $sentenciaUpdateTArticles =
                 "
                 UPDATE articles
-                SET visibility = :visibility, article_title = :article_title, descripcio = :descripcio, article_status = :article_status, category_id = :category_id
+                SET visibility = :visibility, article_title = :article_title, descripcio = :descripcio, article_status = :article_status, category_id = :category_id, user_name = :user_name, article_pic = :article_pic
                 WHERE article_id = :article_id;
             ";
 
@@ -191,6 +198,8 @@ function modifyArticle($articleDades, $user_id, $articleID, $userRole)
             $bdd->bindParam("descripcio", $articleDescription);
             $bdd->bindParam("article_status", $articleStatus);
             $bdd->bindParam("category_id", $articleCategoryID);
+            $bdd->bindParam("user_name", $user_name);
+            $bdd->bindParam("article_pic", $article_pic);
             $bdd->bindParam("article_id", $articleID);
             $bdd->execute(); //executola sentencia
             $bdd->setFetchMode(PDO::FETCH_ASSOC);

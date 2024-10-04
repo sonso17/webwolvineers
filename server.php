@@ -211,6 +211,18 @@ class Server
                     } else {
                         header('HTTP/1.1 405 Method Not Allowed');
                     }
+                } else if ($recurs2 == "GetUserName") {
+                    if ($method == "GET") {
+                        if ($identificador != "") { //si hi ha un identificador d'usuari
+                            echo json_encode(getUserName($apikey, $identificador,$role)); //li passo l'api-key i el UserID
+                            header('HTTP/1.1 200 OK');
+                        } else {
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
+                            echo "User identifier needed";
+                        }
+                    } else {
+                        header('HTTP/1.1 405 Method Not Allowed');
+                    }
                 } else if ($recurs2 == "ModifyUser") {
                     if ($method == "POST") {
                         if ($identificador != "") { //si hi ha un identificador d'usuari
@@ -506,9 +518,18 @@ class Server
                             } else {
                                 header('HTTP/1.1 405 Method Not Allowed');
                             }
+                        } else {
+                            echo "Endpoint not found";
+                            header('HTTP/1.1 417 EXPECTATION FAILED');
                         }
+                    } else {
+                        echo "You have no admin privileges";
+                        header('HTTP/1.1 417 EXPECTATION FAILED');
                     }
                 }
+            } else {
+                echo "You have no user privileges";
+                header('HTTP/1.1 417 EXPECTATION FAILED');
             }
         }
     }

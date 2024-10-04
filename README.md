@@ -129,6 +129,8 @@ Allways ```apikey.user_id.Role```
             "article_status": "revisio",
             "user_id": "1",
             "category_id": "1",
+            "user_name": "wolvi",
+            "article_pic": " foto article"
             "props": [
                 {
                     "prop_id": 1,

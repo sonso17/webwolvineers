@@ -58,7 +58,7 @@ class Server
             }
         } else if ($recurs1 == "SelectOnePublicArticle") {
             if ($method == "GET") {
-                if ($identificador != "") { //si hi ha un identificador de categoria
+                if ($recurs2 != "") { //si hi ha un identificador de categoria
                     // $put = json_decode(file_get_contents('php://input'), true);
                     echo json_encode(SelectOnePublicArticle($recurs2)); //li passo l'api-key i el UserID
                     header('HTTP/1.1 200 OK');

@@ -199,7 +199,8 @@ function modifyArticle($articleDades, $user_id, $articleID, $userRole)
             $bdd->bindParam("article_status", $articleStatus);
             $bdd->bindParam("category_id", $articleCategoryID);
             $bdd->bindParam("user_name", $user_name);
-            $bdd->bindParam("article_pic", $article_pic);
+            $bdd->bindParam("article_pic", $article_pic
+        );
             $bdd->bindParam("article_id", $articleID);
             $bdd->execute(); //executola sentencia
             $bdd->setFetchMode(PDO::FETCH_ASSOC);

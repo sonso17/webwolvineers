@@ -9,7 +9,11 @@
 
         <label for="ArticleDescripcio">Descripció de l'article</label>
         <input v-model="articleDescripcio" type="text" id="articleDescripcio"
-          placeholder="ex: Ianic fa el robot color arcoiris i a tothom li agrada molt(Ojalá) amb un unicorn i princeses">
+          placeholder="ex: Ianic fa el robot color arcoiris i a tothom li agrada molt(Ojalá) amb un unicorn i princeses"><br>
+
+          <label for="ArticlePic">Foto de l'article</label>
+        <input v-model="ArticlePic" type="text" id="ArticlePic"
+          placeholder="hola.jpg"><br>
 
         <div>
           <label for="visibility">Tria la visibilitat/status:</label>
@@ -18,7 +22,13 @@
             <option value="revision">Revisió</option>
             <option value="private">Privat</option>
           </select>
-        </div>
+        </div><br>
+
+        <label for="ArticleCategorySelect">Categoria relacionada:</label>
+        <select v-model="ArticleCategory" id="ArticleCategorySelect">
+        <option v-for="(ArtCat, i) in categoriesInfoJSON" :key="i" :value="ArtCat.category_id">
+          {{ ArtCat.category_name }}
+        </option></select><br>
 
       </div>
       <div>
@@ -29,15 +39,8 @@
           <option value="3">Enllaç</option>
           <option value="2">Imatge</option>
         </select>
-      </div>
+      </div><br>
 
-      <select v-model="ArticleCategory" id="ArticleCategorySelect">
-        <option v-for="(ArtCat, i) in categoriesInfoJSON" :key="i" :value="ArtCat.category_id">
-          {{ ArtCat.category_name }}
-        </option>
-
-      </select>
-      
       <!-- Input dinàmic segons l'opció seleccionada -->
       <div v-if="selectedType === '1'">
         <label for="textInput">Introdueix el text:</label>
@@ -65,12 +68,12 @@
       <h2>Resum article:</h2>
 
       <div v-for="(item, index) in items" :key="index">
-        <div v-if="item.type === '1'">{{ item.value }}</div>
-        <div v-if="item.type === '3'">
-          <a :href="item.value" target="_blank">{{ item.value }}</a>
+        <div v-if="item.prop_id === '1'">{{ item.prop_val }}</div>
+        <div v-if="item.prop_id === '3'">
+          <a :href="item.value" target="_blank">{{ item.prop_val }}</a>
         </div>
-        <div v-if="item.type === '2'">
-          <img :src="item.value" alt="Imatge" style="max-width: 200px;" />
+        <div v-if="item.prop_id === '2'">
+          <img :src="item.prop_val" alt="Imatge" style="max-width: 200px;" />
         </div>
 
         <!-- Botó per editar i eliminar -->
@@ -80,6 +83,7 @@
     </div>
     <button id="btnCrearArticle" @click="EnviarArticle">Crear article</button>
   </div>
+  <div id="divError"></div>
 </template>
 
 <script>
@@ -97,7 +101,9 @@ export default {
       user_role: "",
       ArticleStatus: "",
       ArticleCategory: "",
+      ArticlePic: "",
       categoriesInfoJSON: [],
+      UserName:"",
       selectedType: "", // Emmagatzema el tipus seleccionat (text, link, imatge)
       inputValue: "", // Valor de l'input que l'usuari introdueix
       items: [], // Llista d'elements creats
@@ -108,11 +114,10 @@ export default {
   methods: {
     // Afegir un nou element
     addOption() {
-
       if (this.inputValue) {
         this.items.push({
-          type: this.selectedType,
-          value: this.inputValue,
+          prop_id: this.selectedType,
+          prop_val: this.inputValue,
           position: this.contaPosicio++
         });
         this.resetForm();
@@ -125,8 +130,8 @@ export default {
     // Editar un element existent
     editItem(index) {
       const item = this.items[index];
-      this.selectedType = item.type;
-      this.inputValue = item.value;
+      this.selectedType = item.prop_id;
+      this.inputValue = item.prop_val;
       this.currentIndex = index;
       this.isEditing = true;
     },
@@ -134,8 +139,8 @@ export default {
     updateItem() {
       if (this.inputValue) {
         this.items[this.currentIndex] = {
-          type: this.selectedType,
-          value: this.inputValue
+          prop_id: this.selectedType,
+          prop_val: this.inputValue
         };
         this.resetForm();
       }
@@ -152,8 +157,32 @@ export default {
       this.currentIndex = null;
     },
     EnviarArticle() {
-      console.log(this.items)
-      console.log(this.ArticleCategory)
+      // console.log(this.items)
+      
+
+      axios.post("https://localhost/API/" + this.apikey + "." + this.userID + "." + this.user_role + "/CreateArticle/",
+                {
+                    "data":
+                    {
+                        "visibility": "true",
+                        "article_title": this.articleTitle,
+                        "descripcio": this.articleDescripcio,
+                        "article_status": this.ArticleStatus,
+                        "user_id": this.userID,
+                        "category_id": this.ArticleCategory,
+                        "user_name": this.UserName,
+                        "article_pic": this.ArticlePic,
+                        "props": this.items
+                    }
+                }
+            ).then((response) => {
+                console.log(response.data);
+                this.$router.push('/')
+            }).catch(error => {
+                const message = error.response.data;
+                document.getElementById("divError").innerHTML = message;
+                console.log(`Error message: ${message}`);
+            })
     },
     getCategories() {
       axios.get("http://localhost/API/GetAllCategories")
@@ -162,7 +191,10 @@ export default {
         });
     },
     getUserName() {
-
+      axios.get("http://localhost/API/" + this.apikey + "." + this.userID + "." + this.user_role + "/GetUserName/" + this.userID)
+                .then(resultat => {
+                    this.UserName = resultat.data[0].user_name
+                });
     },
     comprovarSessio() {
       if (sessionStorage.UserID && sessionStorage.APIKEY && sessionStorage.user_role) {
@@ -170,6 +202,7 @@ export default {
         this.apikey = sessionStorage.APIKEY;
         this.user_role = sessionStorage.user_role;
         this.boolSessio = true;
+        
         return true;
       }
       else {
@@ -181,6 +214,7 @@ export default {
   created() {
     this.comprovarSessio();
     this.getCategories();
+    this.getUserName();
   }
 
 };

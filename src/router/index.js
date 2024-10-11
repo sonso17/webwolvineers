@@ -7,6 +7,7 @@ import userModify from '../views/userModify.vue'
 import createArticle from '@/views/createArticle.vue'
 import getArticle from '@/views/getArticle.vue'
 import modifyArticle from '@/views/modifyArticle.vue'
+import AllArticles from '@/views/AllArticles.vue'
 
 const routes = [
   {
@@ -49,8 +50,15 @@ const routes = [
   },
   {
     path: '/getArticle/:id',
+    props: true,
     name: 'getArticle',
     component: getArticle
+  },
+  
+  {
+    path: '/AllArticles',
+    name: 'AllArticles',
+    component: AllArticles
   },
   {
     path: '/modifyArticle/:id',

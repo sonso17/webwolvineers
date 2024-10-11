@@ -19,8 +19,8 @@
     Creat per: {{ ArtInfoJSON.article_user_name }}
 
     <div id="grupButtonsModifyDeleteComp" v-if="userID == ArtInfoJSON.user_id"><!-- -->
-        <button id="updateCompBTN" >ModifyComponent</button>
-        <button id="deleteCompBTN" >Delete component</button>
+        <button id="updateCompBTN" >ModifyArticle</button>
+        <button id="deleteCompBTN" >Delete Article</button>
     </div>
 </template>
 
@@ -43,7 +43,8 @@ export default {
     methods: {
         getArticle() {
             //si hi ha sessio
-                axios.get("http://localhost/API/SelectOnePublicArticle/3/1")
+            
+                axios.get("http://localhost/API/SelectOnePublicArticle/" + this.id + "/")
                     .then(resultat => {
                         this.ArtInfoJSON = resultat.data[0];
                         this.articleID = this.ArtInfoJSON.article_id;
@@ -71,8 +72,9 @@ export default {
         }
     },
     created() {
-        this.getArticle()
         this.comprovarSessio()
+        this.getArticle()
+        
     }
 }
 

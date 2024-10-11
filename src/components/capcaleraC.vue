@@ -1,17 +1,12 @@
 <template>
   <div id="generalHeader">
     <img src="@/assets/LogoFinal.png" id="capLogo" @click="GotoHome()" />
-    <!-- <img src="@/assets/lletresOntainer.png" id="capNomP" /> -->
 
-    <div id="UserInfo" v-if="posardades">
-      <div>
-        <button id="capNomUsuari" @click="GoToUserInfo"> {{ user_name }}</button>
-      </div>
-
+    <div id="UserInfo" v-if="userID && apikey && role && user_name">
+      <button id="capNomUsuari" @click="GoToUserInfo"> {{ user_name }}</button>
       <img v-if="btnLogout" src="@/assets/logout.png" alt="" class="logout" @click="logout">
-
     </div>
-    
+
     <button v-if="!btnLogout" @click="GoToLogIn" class="btLogIn">Log In / Register</button>
 
   </div>
@@ -24,12 +19,12 @@ export default {
   emits: ["logOut"],
   data() {
     return {
-      mostrarMenu: false
+      sessioUsuari: false,
     }
   },
   computed: {
     btnLogout() {
-      return (this.userID != "" && this.apikey != "")
+      return (this.userID != "" && this.apikey != "" && this.role != "" && this.user_name != "")
     }
   },
   methods: {
@@ -57,14 +52,14 @@ export default {
        */
     posardades() {
       if (sessionStorage.UserID && sessionStorage.APIKEY && sessionStorage.role) {
-        this.btnLogout = true;
+        this.sessioUsuari = true;
         return true;
       }
       else {
-        this.btnLogout = false;
         return false;
       }
     },
+   
     /*
     Function: logOut()
 
@@ -72,15 +67,9 @@ export default {
     */
     logout() {
       sessionStorage.clear()
-      this.$emit("logOut", { userID: "", apikey: "" });
-      // this.btnLogout = false;
-      window.location.reload();
+      this.$emit("logOut", { userID: "", apikey: "", role: "", user_name: ""});
+      this.sessioUsuari = false;
       this.$router.push("/")
-    },
-
-    mostrarMenuu() {
-      // Cambiar el estado para mostrar u ocultar el menú
-      this.mostrarMenu = !this.mostrarMenu;
     },
   },
   created() {

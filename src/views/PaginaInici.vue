@@ -10,6 +10,7 @@
     </div>
     <h1>Articles</h1><br>
     <button @click="goToGetArticle">getArticle</button>
+    <button @click="goToAllArticles">UserArticles</button>
     
     <div v-if="boolSessio" id="ButtonsArticles">
       <button @click="goToCreateArticle">Create Article</button>
@@ -53,6 +54,9 @@ export default {
     }, goToModifyArticle() {
       this.$router.push('/modifyArticle/1')
     },
+    goToAllArticles(){
+      this.$router.push('/AllArticles')
+    },
     comprovarSessio() {
       if (sessionStorage.UserID && sessionStorage.APIKEY && sessionStorage.user_role) {
         this.userID = sessionStorage.UserID;
@@ -62,9 +66,9 @@ export default {
         return true;
       }
       else {
-        console.log(this.userID)
-        console.log(this.apikey)
-        console.log(this.user_role)
+        // console.log(this.userID)
+        // console.log(this.apikey)
+        // console.log(this.user_role)
 
         this.boolSessio = false;
         return false;

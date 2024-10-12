@@ -3,6 +3,7 @@
         <h3>{{ aArt.article_title }}</h3>
         <p v-if="aArt.descripcio">{{ aArt.descripcio }}</p>
         <p v-else>No hi ha descripció disponible.</p>
+        <!-- {{ aArt }} -->
     </div>
 </template>
 
@@ -27,12 +28,12 @@ export default {
     padding: 2em 1em;
     margin: 1em;
     height: 200px;
-    width: 300px;
+    width: 800px;
     text-align: center;
     border-radius: 20px;
     display: inline-block;
-    background: rgb(2, 0, 36);
-    background: linear-gradient(90deg, #26580f 0%, rgb(108, 209, 124) 51%, #26580f 100%);
+    /* background: rgb(2, 0, 36); */
+    background: palevioletred;
     cursor: pointer;
     transition: all 250ms ease;
 }

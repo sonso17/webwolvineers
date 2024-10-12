@@ -1,83 +1,73 @@
 <template>
-  <div class="home">
-    <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
-    <h1>Users</h1><br>
-    <div id="ButtonsUsers">
-      <button @click="goToLogIn">Log In</button>
-      <button @click="goToUserInfo">user Info</button>
-      <button @click="goToRegister">Register</button>
-      <button @click="goToModifyUser">Modify User</button>
-    </div>
-    <h1>Articles</h1><br>
-    <button @click="goToGetArticle">getArticle</button>
-    <button @click="goToAllArticles">UserArticles</button>
-    
-    <div v-if="boolSessio" id="ButtonsArticles">
-      <button @click="goToCreateArticle">Create Article</button>
-      <button @click="goToModifyArticle">ModifyArticle</button>
-    </div>
-
-    <h1>Articles:</h1>
-    <div id="articles"></div>
+  <div>
+    <button @click="goToDev">Pagina de desenvolupador</button>
+      <h1>AllArticles (Només Admin)</h1>
+      <h2>Condicions per articles segons l'estat de la sessió:</h2>
+      
+      <!-- Mostrar un missatge si no hi ha articles -->
+      <div v-if="!ArticlesJSON.length">
+          <p>No hi ha articles per mostrar.</p>
+      </div>
+      
+      <!-- Mostrar els articles -->
+      <div id="groupArticles">
+          <ArtArticle v-for="(article, i) in ArticlesJSON" :key="i" :aArt="article" />
+      </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+import ArtArticle from '@/components/artArticle.vue';
+
 export default {
-  name: 'paginaInici',
+  name: "AllArticles",
+  components: {
+      ArtArticle // Registra el component ArtArticle
+  },
   data() {
-    return {
-      userID: "",
-      apikey: "",
-      user_role: "",
-      boolSessio: false
-    }
+      return {
+          userID: "",
+          apikey: "",
+          user_role: "",
+          ArticlesJSON: [], // Cambiem a array per utilitzar v-for
+          boolSessio: false
+      }
   },
   methods: {
-    goToLogIn() {
-      this.$router.push('/login')
-    },
-    goToRegister() {
-      this.$router.push('/register')
-    },
-    goToUserInfo() {
-      this.$router.push('/userInfo/' + this.userID)
-    },
-    goToModifyUser() {
-      this.$router.push('/modifyUser/' + this.userID)
-    },
-    goToCreateArticle() {
-      this.$router.push('/CreateArticle')
-    },
-    goToGetArticle() {
-      this.$router.push('/getArticle/1')
-    }, goToModifyArticle() {
-      this.$router.push('/modifyArticle/1')
-    },
-    goToAllArticles(){
-      this.$router.push('/AllArticles')
-    },
-    comprovarSessio() {
-      if (sessionStorage.UserID && sessionStorage.APIKEY && sessionStorage.user_role) {
-        this.userID = sessionStorage.UserID;
-        this.apikey = sessionStorage.APIKEY;
-        this.user_role = sessionStorage.user_role;
-        this.boolSessio = true;
-        return true;
-      }
-      else {
-        // console.log(this.userID)
-        // console.log(this.apikey)
-        // console.log(this.user_role)
+      // Funció que comprova la sessió de l'usuari
+      comprovarSessio() {
+          if (sessionStorage.UserID && sessionStorage.APIKEY && sessionStorage.user_role) {
+              this.userID = sessionStorage.UserID;
+              this.apikey = sessionStorage.APIKEY;
+              this.user_role = sessionStorage.user_role;
 
-        this.boolSessio = false;
-        return false;
+              this.getAllArticles();
+              this.boolSessio = true;
+          } else {
+              this.boolSessio = false;
+          }
+      },
+      // Funció que fa una petició a l'API i rep la informació d'aquell usuari
+      getAllArticles() {
+          axios.get(`http://localhost/API/${this.apikey}.${this.userID}.${this.user_role}/SelectAllArticles`)
+              .then(resultat => {
+                  this.ArticlesJSON = resultat.data; // Assegura't que el servidor retorna un array
+              })
+              .catch(error => {
+                  console.error('Error al obtenir articles:', error); // Maneig d'errors
+              });
+      },
+      goToDev(){
+        this.$router.push('/pagDev')
       }
-    },
-
   },
   created() {
-    this.comprovarSessio()
+      this.comprovarSessio(); // Comprova la sessió quan el component es crea
   }
 }
 </script>
+
+<style scoped>
+
+</style>
